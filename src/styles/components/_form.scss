@@ -1,0 +1,61 @@
+@use '../variables' as *;
+
+.form-group {
+  margin-bottom: 16px;
+}
+
+.form-label {
+  display: block;
+  font-size: 14px;
+  font-weight: 500;
+  margin-bottom: 6px;
+  color: var(--color-text);
+}
+
+.form-input {
+  width: 100%;
+  padding: 12px 16px;
+  border: 1px solid var(--color-border);
+  border-radius: $radius-md;
+  background: var(--color-input-bg);
+  color: var(--color-text);
+  transition: border-color $transition-fast;
+
+  &:focus {
+    outline: none;
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+  }
+
+  &::placeholder {
+    color: var(--color-text-muted);
+  }
+
+  &--error {
+    border-color: var(--color-danger);
+  }
+}
+
+.form-error {
+  display: block;
+  font-size: 13px;
+  color: var(--color-danger);
+  margin-top: 4px;
+}
+
+.form-input-wrapper {
+  position: relative;
+
+  .form-input {
+    padding-right: 44px;
+  }
+}
+
+.form-input-toggle {
+  position: absolute;
+  right: 4px;
+  top: 50%;
+  transform: translateY(-50%);
+  @include touch-target;
+  color: var(--color-text-muted);
+}
