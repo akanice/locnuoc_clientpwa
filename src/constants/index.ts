@@ -1,8 +1,10 @@
 export const APP_NAME = import.meta.env.VITE_APP_NAME || 'LocNuoc Telesales';
 export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
-export const OAUTH_TOKEN_URL = import.meta.env.VITE_OAUTH_TOKEN_URL;
-export const OAUTH_CLIENT_ID = import.meta.env.VITE_OAUTH_CLIENT_ID;
-export const OAUTH_CLIENT_SECRET = import.meta.env.VITE_OAUTH_CLIENT_SECRET;
+
+export const AUTH_ENDPOINTS = {
+  LOGIN: '/auth/login',
+  REFRESH: '/auth/refresh',
+} as const;
 
 export const STORAGE_KEYS = {
   AUTH: 'locnuoc-auth',

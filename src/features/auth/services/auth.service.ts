@@ -1,11 +1,7 @@
 import axios from 'axios';
 import { apiClient } from '@/lib/axios/client';
-import {
-  OAUTH_TOKEN_URL,
-  OAUTH_CLIENT_ID,
-  OAUTH_CLIENT_SECRET,
-} from '@/constants';
-import type { AuthTokens, LoginResponse, User } from '@/types';
+import { API_BASE_URL, AUTH_ENDPOINTS } from '@/constants';
+import type { LoginResponse, User } from '@/types';
 
 export interface LoginPayload {
   email: string;
@@ -29,22 +25,23 @@ export interface ChangePasswordPayload {
   password_confirmation: string;
 }
 
+const jsonHeaders = {
+  Accept: 'application/json',
+  'Content-Type': 'application/json',
+} as const;
+
 export const authService = {
   async login(payload: LoginPayload): Promise<LoginResponse & { user: User }> {
-    const { data: tokens } = await axios.post<AuthTokens>(OAUTH_TOKEN_URL, {
-      grant_type: 'password',
-      client_id: OAUTH_CLIENT_ID,
-      client_secret: OAUTH_CLIENT_SECRET,
-      username: payload.email,
-      password: payload.password,
-      scope: '*',
-    });
+    const { data } = await axios.post<LoginResponse & { user: User }>(
+      `${API_BASE_URL}${AUTH_ENDPOINTS.LOGIN}`,
+      {
+        email: payload.email,
+        password: payload.password,
+      },
+      { headers: jsonHeaders },
+    );
 
-    const { data: user } = await axios.get<User>(`${import.meta.env.VITE_API_BASE_URL}/user`, {
-      headers: { Authorization: `Bearer ${tokens.access_token}` },
-    });
-
-    return { ...tokens, user };
+    return data;
   },
 
   async logout(): Promise<void> {

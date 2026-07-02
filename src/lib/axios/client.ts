@@ -1,5 +1,5 @@
 import axios, { type AxiosError, type InternalAxiosRequestConfig } from 'axios';
-import { API_BASE_URL, OAUTH_TOKEN_URL, OAUTH_CLIENT_ID, OAUTH_CLIENT_SECRET } from '@/constants';
+import { API_BASE_URL, AUTH_ENDPOINTS } from '@/constants';
 import { useAuthStore } from '@/stores/auth.store';
 import type { AuthTokens } from '@/types';
 
@@ -19,6 +19,9 @@ const processQueue = (error: unknown, token: string | null = null) => {
   });
   failedQueue = [];
 };
+
+const isAuthRequest = (url?: string) =>
+  url?.includes(AUTH_ENDPOINTS.LOGIN) || url?.includes(AUTH_ENDPOINTS.REFRESH);
 
 export const apiClient = axios.create({
   baseURL: API_BASE_URL,
@@ -46,7 +49,7 @@ apiClient.interceptors.response.use(
       return Promise.reject(error);
     }
 
-    if (originalRequest.url?.includes('/oauth/token')) {
+    if (isAuthRequest(originalRequest.url)) {
       return Promise.reject(error);
     }
 
@@ -72,13 +75,16 @@ apiClient.interceptors.response.use(
     isRefreshing = true;
 
     try {
-      const { data } = await axios.post<AuthTokens>(OAUTH_TOKEN_URL, {
-        grant_type: 'refresh_token',
-        refresh_token: refreshToken,
-        client_id: OAUTH_CLIENT_ID,
-        client_secret: OAUTH_CLIENT_SECRET,
-        scope: '*',
-      });
+      const { data } = await axios.post<AuthTokens>(
+        `${API_BASE_URL}${AUTH_ENDPOINTS.REFRESH}`,
+        { refresh_token: refreshToken },
+        {
+          headers: {
+            Accept: 'application/json',
+            'Content-Type': 'application/json',
+          },
+        },
+      );
 
       setTokens(data);
       processQueue(null, data.access_token);

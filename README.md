@@ -31,7 +31,7 @@
 cd locnuoc_clientpwa
 npm install
 cp .env.example .env
-# Cập nhật VITE_API_BASE_URL, VITE_OAUTH_* trong .env
+# Cập nhật VITE_API_BASE_URL trong .env
 npm run dev
 ```
 
@@ -58,22 +58,23 @@ src/
 └── utils/         # Utility functions
 ```
 
-## Backend Laravel Passport
+## Backend Laravel API
 
-Cấu hình OAuth Password Grant trên Laravel:
+PWA gọi API Laravel qua `VITE_API_BASE_URL`. OAuth Passport (`PASSPORT_PASSWORD_CLIENT_ID`, `PASSPORT_PASSWORD_CLIENT_SECRET`) chỉ dùng phía server.
 
-- `POST /oauth/token` — Login & Refresh token
-- `GET /api/user` — Profile
-- `POST /api/logout` — Logout
-- `POST /api/password/email` — Forgot password
-- `POST /api/password/reset` — Reset password
-- `PUT /api/user/password` — Change password
+| Endpoint | Mô tả |
+|----------|-------|
+| `POST /auth/login` | Đăng nhập — trả `access_token`, `refresh_token`, `user` |
+| `POST /auth/refresh` | Làm mới token — body: `{ refresh_token }` |
+| `GET /user` | Profile |
+| `POST /logout` | Đăng xuất |
+| `POST /password/email` | Quên mật khẩu |
+| `POST /password/reset` | Đặt lại mật khẩu |
+| `PUT /user/password` | Đổi mật khẩu |
 
 ## Biến môi trường
 
 | Biến | Mô tả |
 |------|-------|
-| `VITE_API_BASE_URL` | Base URL API Laravel |
-| `VITE_OAUTH_TOKEN_URL` | OAuth token endpoint |
-| `VITE_OAUTH_CLIENT_ID` | Passport client ID |
-| `VITE_OAUTH_CLIENT_SECRET` | Passport client secret |
+| `VITE_APP_NAME` | Tên ứng dụng |
+| `VITE_API_BASE_URL` | Base URL API Laravel (vd: `https://domain.com/api/v1`) |
