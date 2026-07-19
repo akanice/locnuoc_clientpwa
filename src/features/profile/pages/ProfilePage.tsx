@@ -49,9 +49,9 @@ export function ProfilePage() {
           <span>Đổi mật khẩu</span>
           <HiChevronRight />
         </Link>
-        <button type="button" className="menu-list__item" onClick={toggleTheme}>
+        <button type="button" className="menu-list__item w-full" onClick={toggleTheme}>
           {resolvedTheme === 'dark' ? <HiSun /> : <HiMoon />}
-          <span>{resolvedTheme === 'dark' ? 'Chế độ sáng' : 'Chế độ tối'}</span>
+          <span className='text-left'>{resolvedTheme === 'dark' ? 'Chế độ sáng' : 'Chế độ tối'}</span>
           <HiChevronRight />
         </button>
       </div>

@@ -101,3 +101,11 @@ img {
 .page-enter {
   animation: fadeIn $transition-normal forwards;
 }
+
+.text-left {
+  text-align: left;
+}
+
+.w-full {
+  width: 100%;
+}
