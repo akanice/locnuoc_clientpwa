@@ -45,6 +45,7 @@ export function ProfilePage() {
           <span className="flex-1 text-[15px]">Đổi mật khẩu</span>
           <HiChevronRight className="text-slate-500 dark:text-slate-400" />
         </Link>
+<<<<<<< HEAD
         <button type="button" className={`${menuItemClass} w-full`} onClick={toggleTheme}>
           {resolvedTheme === 'dark' ? (
             <HiSun className="text-xl text-slate-500 dark:text-slate-400" />
@@ -55,6 +56,12 @@ export function ProfilePage() {
             {resolvedTheme === 'dark' ? 'Chế độ sáng' : 'Chế độ tối'}
           </span>
           <HiChevronRight className="text-slate-500 dark:text-slate-400" />
+=======
+        <button type="button" className="menu-list__item w-full" onClick={toggleTheme}>
+          {resolvedTheme === 'dark' ? <HiSun /> : <HiMoon />}
+          <span className='text-left'>{resolvedTheme === 'dark' ? 'Chế độ sáng' : 'Chế độ tối'}</span>
+          <HiChevronRight />
+>>>>>>> 3cc02cbc8feec29f77bb57acdeb38870d9d5a0b4
         </button>
       </div>
 
