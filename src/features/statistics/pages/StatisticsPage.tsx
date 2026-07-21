@@ -2,6 +2,7 @@ import { useQuery } from '@tanstack/react-query';
 import dayjs from 'dayjs';
 import { HiTrendingUp, HiTrendingDown } from 'react-icons/hi';
 import { PageSkeleton } from '@/components/ui/Skeleton';
+import { MyOrdersSection } from '@/features/statistics/components/MyOrdersSection';
 import { formatNumber } from '@/utils';
 
 const cardClass =
@@ -88,6 +89,8 @@ export function StatisticsPage() {
           ))}
         </div>
       </div>
+
+      <MyOrdersSection />
     </>
   );
 }

@@ -178,7 +178,7 @@ export function CallResultModal({
         </>
       )}
 
-      <div className="mt-4 grid grid-cols-2 gap-2">
+      <div className="mt-4 grid grid-cols-2 gap-2 mt-8">
         <Button variant="secondary" onClick={handleClose}>
           Đóng
         </Button>
