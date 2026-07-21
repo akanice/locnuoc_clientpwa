@@ -1,24 +1,52 @@
 import { apiClient } from '@/lib/axios/client';
-import {
-  STATUS_PENDING,
-  type OrderStatus,
-} from '@/features/working/services/order.service';
 import type { CallTask } from '@/features/working/types/call-task';
 import type { PaginatedResponse } from '@/types';
+
+export const CUSTOMER_TAB_WAITING = 'waiting' as const;
+export const CUSTOMER_TAB_CALLED = 'called' as const;
+export const CUSTOMER_TAB_NON_EXIST = 'non_exist' as const;
+export const CUSTOMER_TAB_RECALL = 'recall' as const;
+
+export type CustomerTab =
+  | typeof CUSTOMER_TAB_WAITING
+  | typeof CUSTOMER_TAB_CALLED
+  | typeof CUSTOMER_TAB_NON_EXIST
+  | typeof CUSTOMER_TAB_RECALL;
+
+export const CUSTOMER_TAB_OPTIONS = [
+  {
+    value: CUSTOMER_TAB_WAITING,
+    label: 'Chờ gọi',
+    isAvailable: 'available,just_upload',
+  },
+  {
+    value: CUSTOMER_TAB_CALLED,
+    label: 'Không thành công',
+    isAvailable: 'called',
+  },
+  {
+    value: CUSTOMER_TAB_NON_EXIST,
+    label: 'Data lỗi',
+    isAvailable: 'non_exist',
+  },
+  {
+    value: CUSTOMER_TAB_RECALL,
+    label: 'Chờ gọi lại',
+    isAvailable: 'recall',
+  },
+] as const;
 
 export interface ApiCustomer {
   id: number;
   name?: string | null;
   customer_name?: string | null;
   phone?: string | null;
-  status?: OrderStatus;
-  order_status?: OrderStatus;
+  is_available?: string | null;
   note?: string | null;
 }
 
 export interface MyCustomersParams {
-  /** Lọc phía client — backend không hỗ trợ filter order_status */
-  orderStatus?: OrderStatus;
+  isAvailable?: string;
   name?: string;
   phone?: string;
   search?: string;
@@ -26,9 +54,11 @@ export interface MyCustomersParams {
   perPage?: number | 'all' | -1;
 }
 
-export function buildMyCustomersQueryParams(orderStatus: OrderStatus): MyCustomersParams {
+export function buildMyCustomersQueryParams(tab: CustomerTab): MyCustomersParams {
+  const option = CUSTOMER_TAB_OPTIONS.find((item) => item.value === tab);
+
   return {
-    orderStatus,
+    isAvailable: option?.isAvailable,
     perPage: 'all',
     sort: '-created_at',
   };
@@ -38,6 +68,10 @@ function buildMyCustomersParams(params: MyCustomersParams = {}) {
   const query: Record<string, string | number> = {
     per_page: params.perPage ?? 'all',
   };
+
+  if (params.isAvailable) {
+    query['filter[is_available]'] = params.isAvailable;
+  }
 
   if (params.name?.trim()) {
     query['filter[name]'] = params.name.trim();
@@ -58,13 +92,7 @@ function buildMyCustomersParams(params: MyCustomersParams = {}) {
   return query;
 }
 
-function getCustomerOrderStatus(customer: ApiCustomer, fallbackStatus: OrderStatus): OrderStatus {
-  return customer.order_status ?? customer.status ?? fallbackStatus;
-}
-
-function mapToCallTask(customer: ApiCustomer, fallbackStatus: OrderStatus): CallTask {
-  const status = getCustomerOrderStatus(customer, fallbackStatus);
-
+function mapToCallTask(customer: ApiCustomer): CallTask {
   return {
     id: customer.id,
     customerName:
@@ -72,7 +100,7 @@ function mapToCallTask(customer: ApiCustomer, fallbackStatus: OrderStatus): Call
       customer.customer_name?.trim() ||
       'Khách hàng',
     phone: customer.phone?.trim() || '',
-    status,
+    status: customer.is_available?.trim() || 'available',
     note: customer.note?.trim() || undefined,
   };
 }
@@ -91,7 +119,6 @@ function normalizeCustomers(data: unknown): ApiCustomer[] {
 
 export const customerService = {
   async getMyCustomers(params: MyCustomersParams = {}): Promise<CallTask[]> {
-    const fallbackStatus = params.orderStatus ?? STATUS_PENDING;
     const { data } = await apiClient.get<ApiCustomer[] | PaginatedResponse<ApiCustomer>>(
       '/my-customers',
       {
@@ -99,14 +126,6 @@ export const customerService = {
       },
     );
 
-    let items = normalizeCustomers(data);
-
-    if (params.orderStatus) {
-      items = items.filter(
-        (item) => getCustomerOrderStatus(item, fallbackStatus) === params.orderStatus,
-      );
-    }
-
-    return items.map((item) => mapToCallTask(item, fallbackStatus));
+    return normalizeCustomers(data).map(mapToCallTask);
   },
 };

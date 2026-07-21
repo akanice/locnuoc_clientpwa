@@ -1,28 +1,30 @@
 import { useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import {
-  HiCheckCircle,
   HiClock,
-  HiCog,
+  HiExclamationCircle,
   HiPhone,
-  HiXCircle,
+  HiRefresh,
 } from 'react-icons/hi';
 import { SkeletonList } from '@/components/ui/Skeleton';
 import { Button } from '@/components/ui/Button';
 import { CallResultModal } from '@/features/working/components/CallResultModal';
 import { useMyCustomers } from '@/features/working/hooks/useMyCustomers';
 import {
+  MAKE_CALL_STATUS_SUCCESS,
+  type MakeCallStatus,
+} from '@/features/working/services/call.service';
+import {
   buildMyCustomersQueryParams,
+  CUSTOMER_TAB_OPTIONS,
+  CUSTOMER_TAB_WAITING,
+  type CustomerTab,
   type MyCustomersParams,
 } from '@/features/working/services/customer.service';
 import {
-  ORDER_STATUS_OPTIONS,
-  STATUS_PENDING,
-  type OrderStatus,
-} from '@/features/working/services/order.service';
-import {
   MY_CUSTOMERS_QUERY_KEY,
   getCallTaskStatusDisplay,
+  isCallTaskCallable,
   type CallTask,
 } from '@/features/working/types/call-task';
 
@@ -31,19 +33,21 @@ const cardClass =
 const statCardClass =
   'rounded-2xl border border-slate-100 bg-white p-4 text-center shadow-sm dark:border-slate-700 dark:bg-slate-800';
 
-const statusIcons: Record<OrderStatus, typeof HiCheckCircle> = {
-  pending: HiClock,
-  processing: HiCog,
-  completed: HiCheckCircle,
-  cancelled: HiXCircle,
-};
+const statusIcons = {
+  called: HiPhone,
+  recall: HiRefresh,
+  non_exist: HiExclamationCircle,
+  available: HiClock,
+  just_upload: HiClock,
+} as const;
 
-const statusIconColors: Record<OrderStatus, string> = {
-  pending: 'text-warning',
-  processing: 'text-primary',
-  completed: 'text-success',
-  cancelled: 'text-danger',
-};
+const statusIconColors = {
+  called: 'text-danger',
+  recall: 'text-primary',
+  non_exist: 'text-danger',
+  available: 'text-warning',
+  just_upload: 'text-warning',
+} as const;
 
 interface CallModalState {
   customerId: number;
@@ -52,24 +56,25 @@ interface CallModalState {
 
 function getCachedTabCount(
   queryClient: ReturnType<typeof useQueryClient>,
-  orderStatus: OrderStatus,
+  tab: CustomerTab,
 ) {
   return (
     queryClient.getQueryData<CallTask[]>([
       ...MY_CUSTOMERS_QUERY_KEY,
-      buildMyCustomersQueryParams(orderStatus),
+      buildMyCustomersQueryParams(tab),
     ])?.length ?? 0
   );
 }
 
 export function WorkingPage() {
   const queryClient = useQueryClient();
-  const [activeTab, setActiveTab] = useState<OrderStatus>(STATUS_PENDING);
-  const [loadedTabs, setLoadedTabs] = useState<Set<OrderStatus>>(
-    () => new Set([STATUS_PENDING]),
+  const [activeTab, setActiveTab] = useState<CustomerTab>(CUSTOMER_TAB_WAITING);
+  const [loadedTabs, setLoadedTabs] = useState<Set<CustomerTab>>(
+    () => new Set([CUSTOMER_TAB_WAITING]),
   );
   const [activeCall, setActiveCall] = useState<number | null>(null);
   const [callModal, setCallModal] = useState<CallModalState | null>(null);
+  const [reloadTabsOnSelect, setReloadTabsOnSelect] = useState(false);
 
   const queryParams: MyCustomersParams = buildMyCustomersQueryParams(activeTab);
   const {
@@ -81,17 +86,37 @@ export function WorkingPage() {
     enabled: loadedTabs.has(activeTab),
   });
 
-  const handleTabChange = (tab: OrderStatus) => {
+  const reloadTab = (tab: CustomerTab) => {
+    void queryClient.invalidateQueries({
+      queryKey: [...MY_CUSTOMERS_QUERY_KEY, buildMyCustomersQueryParams(tab)],
+    });
+  };
+
+  const handleTabChange = (tab: CustomerTab) => {
     setActiveTab(tab);
     setLoadedTabs((prev) => new Set(prev).add(tab));
+
+    if (reloadTabsOnSelect) {
+      reloadTab(tab);
+    }
+  };
+
+  const handleCallSaved = (status: MakeCallStatus) => {
+    if (status !== MAKE_CALL_STATUS_SUCCESS) return;
+
+    setReloadTabsOnSelect(true);
+    queryClient.removeQueries({ queryKey: MY_CUSTOMERS_QUERY_KEY });
+    setLoadedTabs(new Set([activeTab]));
+    reloadTab(activeTab);
   };
 
   const pendingCount =
-    activeTab === STATUS_PENDING ? tasks.length : getCachedTabCount(queryClient, STATUS_PENDING);
-  const calledCount = ORDER_STATUS_OPTIONS.slice(1).reduce(
-    (sum, option) => sum + getCachedTabCount(queryClient, option.value),
-    0,
-  );
+    activeTab === CUSTOMER_TAB_WAITING
+      ? tasks.length
+      : getCachedTabCount(queryClient, CUSTOMER_TAB_WAITING);
+  const calledCount = CUSTOMER_TAB_OPTIONS.filter(
+    (option) => option.value !== CUSTOMER_TAB_WAITING,
+  ).reduce((sum, option) => sum + getCachedTabCount(queryClient, option.value), 0);
 
   const isTabLoading = isLoading || (isFetching && tasks.length === 0);
 
@@ -120,7 +145,7 @@ export function WorkingPage() {
       <h3 className="mb-3 text-base font-semibold">Danh sách khách hàng</h3>
 
       <div className="mb-4 flex gap-2 overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-        {ORDER_STATUS_OPTIONS.map((option) => {
+        {CUSTOMER_TAB_OPTIONS.map((option) => {
           const isActive = activeTab === option.value;
 
           return (
@@ -156,9 +181,10 @@ export function WorkingPage() {
       ) : (
         tasks.map((task) => {
           const statusDisplay = getCallTaskStatusDisplay(task.status);
+          const statusKey = task.status as keyof typeof statusIcons;
           const StatusIcon =
-            task.status !== STATUS_PENDING && task.status !== 'calling'
-              ? statusIcons[task.status]
+            !isCallTaskCallable(task.status) && task.status !== 'calling'
+              ? statusIcons[statusKey]
               : null;
 
           return (
@@ -182,7 +208,7 @@ export function WorkingPage() {
                   </div>
                 )}
               </div>
-              {task.status === STATUS_PENDING && (
+              {isCallTaskCallable(task.status) && (
                 <Button
                   variant="primary"
                   size="sm"
@@ -193,8 +219,8 @@ export function WorkingPage() {
                   <HiPhone size={20} />
                 </Button>
               )}
-              {StatusIcon && task.status !== STATUS_PENDING && task.status !== 'calling' && (
-                <StatusIcon size={24} className={statusIconColors[task.status]} />
+              {StatusIcon && (
+                <StatusIcon size={24} className={statusIconColors[statusKey] ?? 'text-slate-500'} />
               )}
             </div>
           );
@@ -206,6 +232,7 @@ export function WorkingPage() {
         customerId={callModal?.customerId ?? 0}
         customerName={callModal?.customerName ?? ''}
         onClose={() => setCallModal(null)}
+        onSaved={handleCallSaved}
       />
     </>
   );

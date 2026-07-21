@@ -1,11 +1,10 @@
-import type { OrderStatus } from '@/features/working/services/order.service';
-import { ORDER_STATUS_OPTIONS, STATUS_PENDING } from '@/features/working/services/order.service';
-
 export const MY_CUSTOMERS_QUERY_KEY = ['my-customers'] as const;
 /** @deprecated Use MY_CUSTOMERS_QUERY_KEY with status instead */
 export const CALL_TASKS_QUERY_KEY = MY_CUSTOMERS_QUERY_KEY;
 
-export type CallTaskStatus = 'calling' | OrderStatus;
+export type CustomerAvailability = 'available' | 'just_upload' | 'called' | 'recall' | 'non_exist';
+
+export type CallTaskStatus = 'calling' | CustomerAvailability | (string & {});
 
 export interface CallTask {
   id: number;
@@ -15,28 +14,26 @@ export interface CallTask {
   note?: string;
 }
 
-const orderStatusDisplay = Object.fromEntries(
-  ORDER_STATUS_OPTIONS.map((option) => {
-    const className =
-      option.value === 'pending'
-        ? 'text-warning'
-        : option.value === 'processing'
-          ? 'text-primary'
-          : option.value === 'completed'
-            ? 'text-success'
-            : 'text-danger';
-
-    return [option.value, { label: option.label, className }];
-  }),
-) as Record<OrderStatus, { label: string; className: string }>;
+const availabilityDisplay: Record<string, { label: string; className: string }> = {
+  available: { label: 'Chờ gọi', className: 'text-warning' },
+  just_upload: { label: 'Chờ gọi', className: 'text-warning' },
+  called: { label: 'Không thành công', className: 'text-danger' },
+  recall: { label: 'Chờ gọi lại', className: 'text-primary' },
+  non_exist: { label: 'Data lỗi', className: 'text-danger' },
+};
 
 export function getCallTaskStatusDisplay(status: CallTaskStatus) {
   if (status === 'calling') {
     return { label: 'Đang gọi', className: 'text-primary' };
   }
-  return orderStatusDisplay[status];
+
+  return availabilityDisplay[status] ?? { label: status, className: 'text-slate-500' };
+}
+
+export function isCallTaskCallable(status: CallTaskStatus) {
+  return status === 'available' || status === 'just_upload';
 }
 
 export function isCallTaskProcessed(status: CallTaskStatus) {
-  return status !== STATUS_PENDING && status !== 'calling';
+  return !isCallTaskCallable(status) && status !== 'calling';
 }

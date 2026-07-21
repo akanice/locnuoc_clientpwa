@@ -17,13 +17,6 @@ export interface CreateOrderPayload {
   note: string;
 }
 
-export const ORDER_STATUS_OPTIONS = [
-  { value: STATUS_PENDING, label: 'Chờ xử lý' },
-  { value: STATUS_PROCESSING, label: 'Đang xử lý' },
-  { value: STATUS_COMPLETED, label: 'Hoàn thành' },
-  { value: STATUS_CANCELLED, label: 'Đã hủy' },
-] as const;
-
 export const orderService = {
   async create(payload: CreateOrderPayload): Promise<{ message?: string }> {
     const { data } = await apiClient.post<{ message?: string }>('/orders', payload);

@@ -1,4 +1,5 @@
-import { type ReactNode } from 'react';
+import { useEffect, type ReactNode } from 'react';
+import { createPortal } from 'react-dom';
 import { HiX } from 'react-icons/hi';
 
 interface ModalProps {
@@ -9,10 +10,21 @@ interface ModalProps {
 }
 
 export function Modal({ open, title, onClose, children }: ModalProps) {
+  useEffect(() => {
+    if (!open) return;
+
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+
+    return () => {
+      document.body.style.overflow = previousOverflow;
+    };
+  }, [open]);
+
   if (!open) return null;
 
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+  return createPortal(
+    <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
       <div
         className="absolute inset-0 bg-slate-900/55 backdrop-blur-sm animate-fade-in"
         aria-hidden
@@ -48,6 +60,7 @@ export function Modal({ open, title, onClose, children }: ModalProps) {
         )}
         <div className="overflow-y-auto px-5 py-4">{children}</div>
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }
