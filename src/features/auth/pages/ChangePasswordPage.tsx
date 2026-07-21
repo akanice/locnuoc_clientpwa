@@ -31,70 +31,87 @@ export function ChangePasswordPage() {
   });
 
   return (
-    <div className="auth-page">
-      <div style={{ marginBottom: 16 }}>
-        <Link to={ROUTES.PROFILE} className="btn btn--ghost">
+    <div className="safe-top safe-bottom mx-auto flex min-h-dvh max-w-[480px] flex-col px-6 py-6">
+      <div className="mb-4">
+        <Link
+          to={ROUTES.PROFILE}
+          className="inline-flex items-center gap-2 px-2 py-2 text-slate-500 dark:text-slate-400"
+        >
           <HiArrowLeft size={20} /> Quay lại
         </Link>
       </div>
 
-      <div className="auth-page__header">
-        <h1 className="auth-page__title">Đổi mật khẩu</h1>
-        <p className="auth-page__subtitle">Cập nhật mật khẩu tài khoản của bạn</p>
+      <div className="mb-8 text-center">
+        <h1 className="mb-1 text-2xl font-bold">Đổi mật khẩu</h1>
+        <p className="text-sm text-slate-500 dark:text-slate-400">
+          Cập nhật mật khẩu tài khoản của bạn
+        </p>
       </div>
 
       <form
-        className="auth-page__form"
+        className="flex-1"
         onSubmit={handleSubmit((data) => changePassword.mutate(data))}
         noValidate
       >
-        <div className="form-group">
-          <label htmlFor="current_password" className="form-label">
+        <div className="mb-4">
+          <label htmlFor="current_password" className="mb-1.5 block text-sm font-medium">
             Mật khẩu hiện tại
           </label>
-          <div className="form-input-wrapper">
+          <div className="relative">
             <input
               id="current_password"
               type={showCurrent ? 'text' : 'password'}
               autoComplete="current-password"
-              className={`form-input ${errors.current_password ? 'form-input--error' : ''}`}
+              className={[
+                'w-full rounded-xl border bg-white px-4 py-3 pr-11 transition-colors duration-150',
+                'focus:border-primary focus:outline-none focus:ring-[3px] focus:ring-primary/15',
+                'dark:border-slate-600 dark:bg-slate-800',
+                errors.current_password ? 'border-danger' : 'border-slate-200',
+              ].join(' ')}
               {...register('current_password')}
             />
             <button
               type="button"
-              className="form-input-toggle"
+              className="absolute right-1 top-1/2 flex min-h-11 min-w-11 -translate-y-1/2 items-center justify-center text-slate-500"
               onClick={() => setShowCurrent(!showCurrent)}
             >
               {showCurrent ? <HiEyeOff size={20} /> : <HiEye size={20} />}
             </button>
           </div>
           {errors.current_password && (
-            <span className="form-error">{errors.current_password.message}</span>
+            <span className="mt-1 block text-[13px] text-danger">
+              {errors.current_password.message}
+            </span>
           )}
         </div>
 
-        <div className="form-group">
-          <label htmlFor="password" className="form-label">
+        <div className="mb-4">
+          <label htmlFor="password" className="mb-1.5 block text-sm font-medium">
             Mật khẩu mới
           </label>
-          <div className="form-input-wrapper">
+          <div className="relative">
             <input
               id="password"
               type={showNew ? 'text' : 'password'}
               autoComplete="new-password"
-              className={`form-input ${errors.password ? 'form-input--error' : ''}`}
+              className={[
+                'w-full rounded-xl border bg-white px-4 py-3 pr-11 transition-colors duration-150',
+                'focus:border-primary focus:outline-none focus:ring-[3px] focus:ring-primary/15',
+                'dark:border-slate-600 dark:bg-slate-800',
+                errors.password ? 'border-danger' : 'border-slate-200',
+              ].join(' ')}
               {...register('password')}
             />
             <button
               type="button"
-              className="form-input-toggle"
+              className="absolute right-1 top-1/2 flex min-h-11 min-w-11 -translate-y-1/2 items-center justify-center text-slate-500"
               onClick={() => setShowNew(!showNew)}
             >
               {showNew ? <HiEyeOff size={20} /> : <HiEye size={20} />}
             </button>
           </div>
           {errors.password && (
-            <span className="form-error">{errors.password.message}</span>
+            <span className="mt-1 block text-[13px] text-danger">{errors.password.message}</span>
           )}
         </div>
 

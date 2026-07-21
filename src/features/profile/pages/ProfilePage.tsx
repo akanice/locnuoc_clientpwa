@@ -13,6 +13,12 @@ import { useConfirmLogout } from '@/features/auth/hooks/useAuth';
 import { getInitials } from '@/utils';
 import { ROUTES, APP_NAME } from '@/constants';
 
+const cardClass =
+  'overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-800';
+
+const menuItemClass =
+  'flex min-h-11 items-center gap-3 border-b border-slate-200 px-4 py-4 transition-colors active:bg-slate-50 dark:border-slate-700 dark:active:bg-slate-900 last:border-b-0';
+
 export function ProfilePage() {
   const user = useAuthStore(selectUser);
   const { resolvedTheme, toggleTheme } = useTheme();
@@ -20,71 +26,61 @@ export function ProfilePage() {
 
   return (
     <>
-      <div className="profile-header">
-        <div className="profile-header__avatar">
+      <div className={`${cardClass} mb-4 p-6 text-center`}>
+        <div className="mx-auto mb-3 flex size-[72px] items-center justify-center rounded-full bg-primary text-2xl font-bold text-white">
           {user?.name ? getInitials(user.name) : 'U'}
         </div>
-        <div className="profile-header__name">{user?.name || 'Người dùng'}</div>
-        <div className="profile-header__email">{user?.email}</div>
+        <div className="text-lg font-semibold">{user?.name || 'Người dùng'}</div>
+        <div className="mt-1 text-sm text-slate-500 dark:text-slate-400">{user?.email}</div>
         {user?.role && (
-          <div
-            style={{
-              marginTop: 8,
-              fontSize: 12,
-              background: 'var(--color-primary)',
-              color: '#fff',
-              padding: '4px 12px',
-              borderRadius: 12,
-              display: 'inline-block',
-            }}
-          >
+          <div className="mt-2 inline-block rounded-xl bg-primary px-3 py-1 text-xs text-white">
             {user.role}
           </div>
         )}
       </div>
 
-      <div className="menu-list" style={{ marginBottom: 16 }}>
-        <Link to={ROUTES.CHANGE_PASSWORD} className="menu-list__item">
-          <HiKey />
-          <span>Đổi mật khẩu</span>
-          <HiChevronRight />
+      <div className={`${cardClass} mb-4`}>
+        <Link to={ROUTES.CHANGE_PASSWORD} className={menuItemClass}>
+          <HiKey className="text-xl text-slate-500 dark:text-slate-400" />
+          <span className="flex-1 text-[15px]">Đổi mật khẩu</span>
+          <HiChevronRight className="text-slate-500 dark:text-slate-400" />
         </Link>
-        <button type="button" className="menu-list__item" onClick={toggleTheme}>
-          {resolvedTheme === 'dark' ? <HiSun /> : <HiMoon />}
-          <span>{resolvedTheme === 'dark' ? 'Chế độ sáng' : 'Chế độ tối'}</span>
-          <HiChevronRight />
+        <button type="button" className={`${menuItemClass} w-full`} onClick={toggleTheme}>
+          {resolvedTheme === 'dark' ? (
+            <HiSun className="text-xl text-slate-500 dark:text-slate-400" />
+          ) : (
+            <HiMoon className="text-xl text-slate-500 dark:text-slate-400" />
+          )}
+          <span className="flex-1 text-left text-[15px]">
+            {resolvedTheme === 'dark' ? 'Chế độ sáng' : 'Chế độ tối'}
+          </span>
+          <HiChevronRight className="text-slate-500 dark:text-slate-400" />
         </button>
       </div>
 
-      <div className="menu-list" style={{ marginBottom: 16 }}>
-        <div className="menu-list__item">
-          <HiInformationCircle />
-          <span>Phiên bản</span>
-          <span style={{ color: 'var(--color-text-muted)', fontSize: 14 }}>1.0.0</span>
+      <div className={`${cardClass} mb-4`}>
+        <div className={menuItemClass}>
+          <HiInformationCircle className="text-xl text-slate-500 dark:text-slate-400" />
+          <span className="flex-1 text-[15px]">Phiên bản</span>
+          <span className="text-sm text-slate-500 dark:text-slate-400">1.0.0</span>
         </div>
       </div>
 
-      <div className="menu-list" style={{ marginBottom: 16 }}>
+      <div className={`${cardClass} mb-4`}>
         <button
           type="button"
-          className="menu-list__item menu-list__item--danger"
+          className={`${menuItemClass} w-full text-danger`}
           onClick={confirmLogout}
           disabled={isPending}
-          style={{ width: '100%' }}
         >
-          <HiLogout />
-          <span>{isPending ? 'Đang đăng xuất...' : 'Đăng xuất'}</span>
+          <HiLogout className="text-xl text-danger" />
+          <span className="flex-1 text-left text-[15px]">
+            {isPending ? 'Đang đăng xuất...' : 'Đăng xuất'}
+          </span>
         </button>
       </div>
 
-      <p
-        style={{
-          textAlign: 'center',
-          fontSize: 12,
-          color: 'var(--color-text-muted)',
-          marginTop: 24,
-        }}
-      >
+      <p className="mt-6 text-center text-xs text-slate-500 dark:text-slate-400">
         {APP_NAME} © {new Date().getFullYear()}
       </p>
     </>

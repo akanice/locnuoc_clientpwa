@@ -8,6 +8,11 @@ import { formatNumber } from '@/utils';
 
 dayjs.locale('vi');
 
+const cardClass =
+  'rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-700 dark:bg-slate-800';
+const statCardClass =
+  'rounded-2xl border border-slate-200 bg-white p-4 text-center shadow-sm dark:border-slate-700 dark:bg-slate-800';
+
 export function HomePage() {
   const user = useAuthStore(selectUser);
 
@@ -26,40 +31,46 @@ export function HomePage() {
 
   return (
     <>
-      <div className="card" style={{ marginBottom: 16 }}>
-        <p style={{ fontSize: 14, color: 'var(--color-text-muted)' }}>
+      <div className={`${cardClass} mb-4`}>
+        <p className="text-sm text-slate-500 dark:text-slate-400">
           {dayjs().format('dddd, DD/MM/YYYY')}
         </p>
-        <h2 style={{ fontSize: 20, fontWeight: 600, marginTop: 4 }}>
+        <h2 className="mt-1 text-xl font-semibold">
           Xin chào, {user?.name?.split(' ').pop()}! 👋
         </h2>
       </div>
 
-      <div className="stat-grid">
-        <div className="stat-card">
-          <HiPhone style={{ fontSize: 24, color: 'var(--color-primary)', margin: '0 auto 8px' }} />
-          <div className="stat-card__value">{formatNumber(stats?.todayCalls ?? 0)}</div>
-          <div className="stat-card__label">Cuộc gọi hôm nay</div>
+      <div className="mb-4 grid grid-cols-2 gap-3">
+        <div className={statCardClass}>
+          <HiPhone className="mx-auto mb-2 text-2xl text-primary" />
+          <div className="text-2xl font-bold text-primary">
+            {formatNumber(stats?.todayCalls ?? 0)}
+          </div>
+          <div className="mt-1 text-xs text-slate-500 dark:text-slate-400">Cuộc gọi hôm nay</div>
         </div>
-        <div className="stat-card">
-          <HiCheckCircle style={{ fontSize: 24, color: 'var(--color-success)', margin: '0 auto 8px' }} />
-          <div className="stat-card__value">{formatNumber(stats?.completedCalls ?? 0)}</div>
-          <div className="stat-card__label">Hoàn thành</div>
+        <div className={statCardClass}>
+          <HiCheckCircle className="mx-auto mb-2 text-2xl text-success" />
+          <div className="text-2xl font-bold text-primary">
+            {formatNumber(stats?.completedCalls ?? 0)}
+          </div>
+          <div className="mt-1 text-xs text-slate-500 dark:text-slate-400">Hoàn thành</div>
         </div>
-        <div className="stat-card">
-          <HiClock style={{ fontSize: 24, color: 'var(--color-warning)', margin: '0 auto 8px' }} />
-          <div className="stat-card__value">{formatNumber(stats?.pendingCalls ?? 0)}</div>
-          <div className="stat-card__label">Đang chờ</div>
+        <div className={statCardClass}>
+          <HiClock className="mx-auto mb-2 text-2xl text-warning" />
+          <div className="text-2xl font-bold text-primary">
+            {formatNumber(stats?.pendingCalls ?? 0)}
+          </div>
+          <div className="mt-1 text-xs text-slate-500 dark:text-slate-400">Đang chờ</div>
         </div>
-        <div className="stat-card">
-          <div className="stat-card__value">{stats?.conversionRate ?? 0}%</div>
-          <div className="stat-card__label">Tỷ lệ chốt</div>
+        <div className={statCardClass}>
+          <div className="text-2xl font-bold text-primary">{stats?.conversionRate ?? 0}%</div>
+          <div className="mt-1 text-xs text-slate-500 dark:text-slate-400">Tỷ lệ chốt</div>
         </div>
       </div>
 
-      <h3 style={{ fontSize: 16, fontWeight: 600, marginBottom: 12 }}>Hoạt động gần đây</h3>
-      <div className="card">
-        <p style={{ fontSize: 14, color: 'var(--color-text-muted)', textAlign: 'center', padding: '16px 0' }}>
+      <h3 className="mb-3 text-base font-semibold">Hoạt động gần đây</h3>
+      <div className={cardClass}>
+        <p className="py-4 text-center text-sm text-slate-500 dark:text-slate-400">
           Chưa có hoạt động nào hôm nay. Bắt đầu gọi điện tại tab Working!
         </p>
       </div>

@@ -1,7 +1,9 @@
 import axios from 'axios';
 import { apiClient } from '@/lib/axios/client';
 import { API_BASE_URL, AUTH_ENDPOINTS } from '@/constants';
-import type { LoginResponse, User } from '@/types';
+import { extractAuthTokens, extractUser } from '@/utils/auth-response';
+import { unwrapApiData } from '@/utils';
+import type { ApiResponse, AuthTokens, LoginResponse, User } from '@/types';
 
 export interface LoginPayload {
   email: string;
@@ -31,8 +33,8 @@ const jsonHeaders = {
 } as const;
 
 export const authService = {
-  async login(payload: LoginPayload): Promise<LoginResponse & { user: User }> {
-    const { data } = await axios.post<LoginResponse & { user: User }>(
+  async login(payload: LoginPayload): Promise<LoginResponse & { user: User | null }> {
+    const { data: body } = await axios.post<ApiResponse<unknown> & { user?: User }>(
       `${API_BASE_URL}${AUTH_ENDPOINTS.LOGIN}`,
       {
         email: payload.email,
@@ -41,7 +43,31 @@ export const authService = {
       { headers: jsonHeaders },
     );
 
-    return data;
+    const unwrapped = unwrapApiData(body);
+    let tokens: AuthTokens;
+
+    try {
+      tokens = extractAuthTokens(unwrapped);
+    } catch {
+      tokens = extractAuthTokens(body);
+    }
+
+    let user = extractUser(unwrapped) ?? extractUser(body);
+
+    if (!user) {
+      const { data: profileBody } = await axios.get<ApiResponse<User>>(
+        `${API_BASE_URL}/auth/me`,
+        {
+          headers: {
+            ...jsonHeaders,
+            Authorization: `Bearer ${tokens.access_token}`,
+          },
+        },
+      );
+      user = unwrapApiData(profileBody);
+    }
+
+    return { ...tokens, user };
   },
 
   async logout(): Promise<void> {
@@ -53,7 +79,7 @@ export const authService = {
   },
 
   async getProfile(): Promise<User> {
-    const { data } = await apiClient.get<User>('/user');
+    const { data } = await apiClient.get<User>('/auth/me');
     return data;
   },
 

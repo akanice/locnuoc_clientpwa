@@ -17,7 +17,7 @@ export function useLogin() {
     mutationFn: (data: LoginFormData) => authService.login(data),
     onSuccess: ({ user, ...tokens }) => {
       setAuth(user, tokens);
-      toast.success(`Xin chào, ${user.name}!`);
+      toast.success(`Xin chào, ${user?.name?.trim() || 'Người dùng'}!`);
       navigate(ROUTES.HOME, { replace: true });
     },
     onError: (error) => {

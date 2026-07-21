@@ -25,7 +25,7 @@ export function MainLayout() {
     <>
       <AppShell title={title}>
         <PullToRefresh onRefresh={handleRefresh}>
-          <div className="app-shell__content page-enter">
+          <div className="animate-fade-in p-4">
             <Outlet />
           </div>
         </PullToRefresh>

@@ -4,6 +4,11 @@ import { HiTrendingUp, HiTrendingDown } from 'react-icons/hi';
 import { PageSkeleton } from '@/components/ui/Skeleton';
 import { formatNumber } from '@/utils';
 
+const cardClass =
+  'rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-700 dark:bg-slate-800';
+const statCardClass =
+  'rounded-2xl border border-slate-200 bg-white p-4 text-center shadow-sm dark:border-slate-700 dark:bg-slate-800';
+
 export function StatisticsPage() {
   const { data: stats, isLoading } = useQuery({
     queryKey: ['statistics'],
@@ -35,63 +40,50 @@ export function StatisticsPage() {
 
   return (
     <>
-      <div className="card" style={{ marginBottom: 16 }}>
-        <p style={{ fontSize: 14, color: 'var(--color-text-muted)' }}>
+      <div className={`${cardClass} mb-4`}>
+        <p className="text-sm text-slate-500 dark:text-slate-400">
           Thống kê tháng {dayjs().format('MM/YYYY')}
         </p>
       </div>
 
-      <div className="stat-grid">
-        <div className="stat-card">
-          <div className="stat-card__value">{formatNumber(stats?.totalCalls ?? 0)}</div>
-          <div className="stat-card__label">Tổng cuộc gọi</div>
+      <div className="mb-4 grid grid-cols-2 gap-3">
+        <div className={statCardClass}>
+          <div className="text-2xl font-bold text-primary">
+            {formatNumber(stats?.totalCalls ?? 0)}
+          </div>
+          <div className="mt-1 text-xs text-slate-500 dark:text-slate-400">Tổng cuộc gọi</div>
           <TrendBadge value={stats?.trends.calls ?? 0} />
         </div>
-        <div className="stat-card">
-          <div className="stat-card__value">{formatNumber(stats?.totalOrders ?? 0)}</div>
-          <div className="stat-card__label">Đơn hàng</div>
+        <div className={statCardClass}>
+          <div className="text-2xl font-bold text-primary">
+            {formatNumber(stats?.totalOrders ?? 0)}
+          </div>
+          <div className="mt-1 text-xs text-slate-500 dark:text-slate-400">Đơn hàng</div>
           <TrendBadge value={stats?.trends.orders ?? 0} />
         </div>
-        <div className="stat-card">
-          <div className="stat-card__value">
+        <div className={statCardClass}>
+          <div className="text-2xl font-bold text-primary">
             {(stats?.revenue ?? 0) / 1000000}M
           </div>
-          <div className="stat-card__label">Doanh thu</div>
+          <div className="mt-1 text-xs text-slate-500 dark:text-slate-400">Doanh thu</div>
           <TrendBadge value={stats?.trends.revenue ?? 0} />
         </div>
-        <div className="stat-card">
-          <div className="stat-card__value">{stats?.avgCallDuration}</div>
-          <div className="stat-card__label">TB thời gian gọi</div>
+        <div className={statCardClass}>
+          <div className="text-2xl font-bold text-primary">{stats?.avgCallDuration}</div>
+          <div className="mt-1 text-xs text-slate-500 dark:text-slate-400">TB thời gian gọi</div>
         </div>
       </div>
 
-      <h3 style={{ fontSize: 16, fontWeight: 600, marginBottom: 12 }}>Cuộc gọi theo tuần</h3>
-      <div className="card">
-        <div style={{ display: 'flex', alignItems: 'flex-end', gap: 8, height: 120 }}>
+      <h3 className="mb-3 text-base font-semibold">Cuộc gọi theo tuần</h3>
+      <div className={cardClass}>
+        <div className="flex h-[120px] items-end gap-2">
           {stats?.weeklyData.map((item) => (
-            <div
-              key={item.day}
-              style={{
-                flex: 1,
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                gap: 4,
-              }}
-            >
+            <div key={item.day} className="flex flex-1 flex-col items-center gap-1">
               <div
-                style={{
-                  width: '100%',
-                  height: `${(item.calls / maxCalls) * 100}%`,
-                  minHeight: 4,
-                  background: 'var(--color-primary)',
-                  borderRadius: 4,
-                  opacity: 0.8,
-                }}
+                className="w-full min-h-1 rounded bg-primary opacity-80"
+                style={{ height: `${(item.calls / maxCalls) * 100}%` }}
               />
-              <span style={{ fontSize: 11, color: 'var(--color-text-muted)' }}>
-                {item.day}
-              </span>
+              <span className="text-[11px] text-slate-500 dark:text-slate-400">{item.day}</span>
             </div>
           ))}
         </div>
@@ -106,15 +98,10 @@ function TrendBadge({ value }: { value: number }) {
 
   return (
     <div
-      style={{
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        gap: 2,
-        fontSize: 12,
-        marginTop: 4,
-        color: isPositive ? 'var(--color-success)' : 'var(--color-danger)',
-      }}
+      className={[
+        'mt-1 flex items-center justify-center gap-0.5 text-xs',
+        isPositive ? 'text-success' : 'text-danger',
+      ].join(' ')}
     >
       <Icon size={14} />
       {Math.abs(value)}%

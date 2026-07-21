@@ -1,6 +1,23 @@
 import axios from 'axios';
 import type { AxiosError } from 'axios';
-import type { ApiError } from '@/types';
+import type { ApiError, ApiResponse } from '@/types';
+
+export function isApiResponse<T>(value: unknown): value is ApiResponse<T> {
+  return (
+    typeof value === 'object' &&
+    value !== null &&
+    'success' in value &&
+    'data' in value
+  );
+}
+
+export function unwrapApiData<T>(value: T | ApiResponse<T>): T {
+  if (isApiResponse<T>(value)) {
+    return value.data;
+  }
+
+  return value;
+}
 
 export function getErrorMessage(error: unknown, fallback = 'Đã xảy ra lỗi'): string {
   if (axios.isAxiosError(error)) {

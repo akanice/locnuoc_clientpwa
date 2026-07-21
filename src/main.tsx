@@ -3,7 +3,7 @@ import { createRoot } from 'react-dom/client';
 import { registerSW } from 'virtual:pwa-register';
 import { App } from '@/app/App';
 import { hideSplashScreen } from '@/utils';
-import '@/styles/index.scss';
+import '@/styles/index.css';
 import 'react-toastify/dist/ReactToastify.css';
 
 const updateSW = registerSW({

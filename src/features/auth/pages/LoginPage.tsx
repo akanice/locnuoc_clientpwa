@@ -23,15 +23,19 @@ export function LoginPage() {
   });
 
   return (
-    <div className="auth-page">
-      <div className="auth-page__header">
-        <div className="auth-page__logo">LN</div>
-        <h1 className="auth-page__title">{APP_NAME}</h1>
-        <p className="auth-page__subtitle">Đăng nhập để bắt đầu làm việc</p>
+    <div className="safe-top safe-bottom mx-auto grid content-center flex min-h-dvh max-w-[480px] flex-col px-6 py-6">
+      <div className="mb-8 text-center">
+        <div className="mx-auto mb-4 flex size-[72px] items-center justify-center rounded-3xl bg-primary text-[28px] font-bold text-white">
+          LN
+        </div>
+        <h1 className="mb-1 text-2xl font-bold">{APP_NAME}</h1>
+        <p className="text-sm text-slate-500 dark:text-slate-400">
+          Đăng nhập để bắt đầu làm việc
+        </p>
       </div>
 
       <form
-        className="auth-page__form"
+        className="flex-1"
         onSubmit={handleSubmit((data) => login.mutate(data))}
         noValidate
       >
@@ -44,22 +48,27 @@ export function LoginPage() {
           {...register('email')}
         />
 
-        <div className="form-group">
-          <label htmlFor="password" className="form-label">
+        <div className="mb-4">
+          <label htmlFor="password" className="mb-1.5 block text-sm font-medium">
             Mật khẩu
           </label>
-          <div className="form-input-wrapper">
+          <div className="relative">
             <input
               id="password"
               type={showPassword ? 'text' : 'password'}
               autoComplete="current-password"
               placeholder="••••••••"
-              className={`form-input ${errors.password ? 'form-input--error' : ''}`}
+              className={[
+                'w-full rounded-xl border bg-white px-4 py-3 pr-11 text-slate-900 transition-colors duration-150',
+                'placeholder:text-slate-500 focus:border-primary focus:outline-none focus:ring-[3px] focus:ring-primary/15',
+                'dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100',
+                errors.password ? 'border-danger' : 'border-slate-200',
+              ].join(' ')}
               {...register('password')}
             />
             <button
               type="button"
-              className="form-input-toggle"
+              className="absolute right-1 top-1/2 flex min-h-11 min-w-11 -translate-y-1/2 items-center justify-center text-slate-500 dark:text-slate-400"
               onClick={() => setShowPassword(!showPassword)}
               aria-label={showPassword ? 'Ẩn mật khẩu' : 'Hiện mật khẩu'}
             >
@@ -67,12 +76,14 @@ export function LoginPage() {
             </button>
           </div>
           {errors.password && (
-            <span className="form-error">{errors.password.message}</span>
+            <span className="mt-1 block text-[13px] text-danger">{errors.password.message}</span>
           )}
         </div>
 
-        <div style={{ textAlign: 'right', marginBottom: 24 }}>
-          <Link to={ROUTES.FORGOT_PASSWORD}>Quên mật khẩu?</Link>
+        <div className="mb-6 text-right">
+          <Link to={ROUTES.FORGOT_PASSWORD} className="font-semibold text-primary">
+            Quên mật khẩu?
+          </Link>
         </div>
 
         <Button type="submit" loading={login.isPending}>

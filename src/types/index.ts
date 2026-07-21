@@ -23,6 +23,13 @@ export interface ApiError {
   errors?: Record<string, string[]>;
 }
 
+export interface ApiResponse<T = unknown> {
+  success: boolean;
+  message: string | null;
+  data: T;
+  errors?: Record<string, string[]> | null;
+}
+
 export interface PaginatedResponse<T> {
   data: T[];
   meta: {

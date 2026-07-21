@@ -23,17 +23,19 @@ export function ForgotPasswordPage() {
   });
 
   return (
-    <div className="auth-page">
-      <div className="auth-page__header">
-        <div className="auth-page__logo">LN</div>
-        <h1 className="auth-page__title">Quên mật khẩu</h1>
-        <p className="auth-page__subtitle">
+    <div className="safe-top safe-bottom mx-auto flex min-h-dvh max-w-[480px] flex-col px-6 py-6">
+      <div className="mb-8 text-center">
+        <div className="mx-auto mb-4 flex size-[72px] items-center justify-center rounded-3xl bg-primary text-[28px] font-bold text-white">
+          LN
+        </div>
+        <h1 className="mb-1 text-2xl font-bold">Quên mật khẩu</h1>
+        <p className="text-sm text-slate-500 dark:text-slate-400">
           Nhập email để nhận link đặt lại mật khẩu
         </p>
       </div>
 
       <form
-        className="auth-page__form"
+        className="flex-1"
         onSubmit={handleSubmit((data) => forgotPassword.mutate(data))}
         noValidate
       >
@@ -51,8 +53,10 @@ export function ForgotPasswordPage() {
         </Button>
       </form>
 
-      <div className="auth-page__footer">
-        <Link to={ROUTES.LOGIN}>← Quay lại đăng nhập</Link>
+      <div className="mt-6 text-center text-sm text-slate-500 dark:text-slate-400">
+        <Link to={ROUTES.LOGIN} className="font-semibold text-primary">
+          ← Quay lại đăng nhập
+        </Link>
       </div>
     </div>
   );

@@ -10,7 +10,7 @@ interface AuthState {
   expiresAt: number | null;
   isAuthenticated: boolean;
   isHydrated: boolean;
-  setAuth: (user: User, tokens: AuthTokens) => void;
+  setAuth: (user: User | null, tokens: AuthTokens) => void;
   setTokens: (tokens: AuthTokens) => void;
   setUser: (user: User) => void;
   clearAuth: () => void;
@@ -33,16 +33,16 @@ export const useAuthStore = create<AuthState>()(
           accessToken: tokens.access_token,
           refreshToken: tokens.refresh_token,
           expiresAt: Date.now() + tokens.expires_in * 1000,
-          isAuthenticated: true,
+          isAuthenticated: Boolean(tokens.access_token),
         }),
 
       setTokens: (tokens) =>
-        set({
+        set((state) => ({
           accessToken: tokens.access_token,
-          refreshToken: tokens.refresh_token,
+          refreshToken: tokens.refresh_token || state.refreshToken,
           expiresAt: Date.now() + tokens.expires_in * 1000,
-          isAuthenticated: true,
-        }),
+          isAuthenticated: Boolean(tokens.access_token),
+        })),
 
       setUser: (user) => set({ user }),
 

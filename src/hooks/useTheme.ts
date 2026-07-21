@@ -14,7 +14,7 @@ export function useTheme() {
   useEffect(() => {
     const resolved = mode === 'system' ? getSystemTheme() : mode;
     setResolvedTheme(resolved);
-    document.documentElement.setAttribute('data-theme', resolved);
+    document.documentElement.classList.toggle('dark', resolved === 'dark');
 
     const metaTheme = document.querySelector('meta[name="theme-color"]');
     if (metaTheme) {
@@ -29,7 +29,7 @@ export function useTheme() {
     const handler = (e: MediaQueryListEvent) => {
       const resolved = e.matches ? 'dark' : 'light';
       setResolvedTheme(resolved);
-      document.documentElement.setAttribute('data-theme', resolved);
+      document.documentElement.classList.toggle('dark', resolved === 'dark');
     };
 
     mediaQuery.addEventListener('change', handler);

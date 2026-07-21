@@ -1,7 +1,9 @@
 import axios, { type AxiosError, type InternalAxiosRequestConfig } from 'axios';
 import { API_BASE_URL, AUTH_ENDPOINTS } from '@/constants';
 import { useAuthStore } from '@/stores/auth.store';
-import type { AuthTokens } from '@/types';
+import { unwrapApiData } from '@/utils';
+import { extractAuthTokens } from '@/utils/auth-response';
+import type { ApiResponse, AuthTokens } from '@/types';
 
 let isRefreshing = false;
 let failedQueue: Array<{
@@ -41,7 +43,10 @@ apiClient.interceptors.request.use((config: InternalAxiosRequestConfig) => {
 });
 
 apiClient.interceptors.response.use(
-  (response) => response,
+  (response) => {
+    response.data = unwrapApiData(response.data);
+    return response;
+  },
   async (error: AxiosError) => {
     const originalRequest = error.config as InternalAxiosRequestConfig & { _retry?: boolean };
 
@@ -75,7 +80,7 @@ apiClient.interceptors.response.use(
     isRefreshing = true;
 
     try {
-      const { data } = await axios.post<AuthTokens>(
+      const { data } = await axios.post<ApiResponse<AuthTokens>>(
         `${API_BASE_URL}${AUTH_ENDPOINTS.REFRESH}`,
         { refresh_token: refreshToken },
         {
@@ -86,11 +91,12 @@ apiClient.interceptors.response.use(
         },
       );
 
-      setTokens(data);
-      processQueue(null, data.access_token);
+      const tokens = extractAuthTokens(unwrapApiData(data));
+      setTokens(tokens);
+      processQueue(null, tokens.access_token);
 
       if (originalRequest.headers) {
-        originalRequest.headers.Authorization = `Bearer ${data.access_token}`;
+        originalRequest.headers.Authorization = `Bearer ${tokens.access_token}`;
       }
 
       return apiClient(originalRequest);

@@ -59,12 +59,15 @@ export function PullToRefresh({ onRefresh, children, disabled = false }: PullToR
   const isVisible = pullDistance > 0 || refreshing;
 
   return (
-    <div className="pull-refresh">
+    <div className="relative overflow-hidden">
       <div
-        className={`pull-refresh__indicator ${isVisible ? 'pull-refresh__indicator--visible' : ''}`}
+        className={[
+          'absolute inset-x-0 top-0 flex h-12 items-center justify-center text-primary transition-transform duration-250',
+          isVisible ? 'translate-y-0' : '-translate-y-full',
+        ].join(' ')}
         style={{ transform: `translateY(${refreshing ? 0 : pullDistance - THRESHOLD}px)` }}
       >
-        <HiRefresh size={24} />
+        <HiRefresh size={24} className="animate-spin-slow" />
       </div>
       <div
         ref={containerRef}
