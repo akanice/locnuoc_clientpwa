@@ -5,9 +5,9 @@ import { PageSkeleton } from '@/components/ui/Skeleton';
 import { formatNumber } from '@/utils';
 
 const cardClass =
-  'rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-700 dark:bg-slate-800';
+  'rounded-2xl border border-slate-200 bg-white p-4 shadow-xl dark:border-slate-700 dark:bg-slate-800';
 const statCardClass =
-  'rounded-2xl border border-slate-200 bg-white p-4 text-center shadow-sm dark:border-slate-700 dark:bg-slate-800';
+  'rounded-2xl border border-slate-200 bg-white p-4 text-center shadow-xl dark:border-slate-700 dark:bg-slate-800';
 
 export function StatisticsPage() {
   const { data: stats, isLoading } = useQuery({
@@ -61,7 +61,7 @@ export function StatisticsPage() {
           <div className="mt-1 text-xs text-slate-500 dark:text-slate-400">Đơn hàng</div>
           <TrendBadge value={stats?.trends.orders ?? 0} />
         </div>
-        <div className={statCardClass}>
+        {/* <div className={statCardClass}>
           <div className="text-2xl font-bold text-primary">
             {(stats?.revenue ?? 0) / 1000000}M
           </div>
@@ -71,7 +71,7 @@ export function StatisticsPage() {
         <div className={statCardClass}>
           <div className="text-2xl font-bold text-primary">{stats?.avgCallDuration}</div>
           <div className="mt-1 text-xs text-slate-500 dark:text-slate-400">TB thời gian gọi</div>
-        </div>
+        </div> */}
       </div>
 
       <h3 className="mb-3 text-base font-semibold">Cuộc gọi theo tuần</h3>

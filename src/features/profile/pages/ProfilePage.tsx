@@ -14,7 +14,7 @@ import { getInitials } from '@/utils';
 import { ROUTES, APP_NAME } from '@/constants';
 
 const cardClass =
-  'overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-800';
+  'overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-xl dark:border-slate-700 dark:bg-slate-800';
 
 const menuItemClass =
   'flex min-h-11 items-center gap-3 border-b border-slate-200 px-4 py-4 transition-colors active:bg-slate-50 dark:border-slate-700 dark:active:bg-slate-900 last:border-b-0';

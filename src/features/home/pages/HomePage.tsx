@@ -9,9 +9,9 @@ import { formatNumber } from '@/utils';
 dayjs.locale('vi');
 
 const cardClass =
-  'rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-700 dark:bg-slate-800';
+  'rounded-2xl border border-slate-200 bg-white p-4 shadow-xl dark:border-slate-700 dark:bg-slate-800';
 const statCardClass =
-  'rounded-2xl border border-slate-200 bg-white p-4 text-center shadow-sm dark:border-slate-700 dark:bg-slate-800';
+  'rounded-2xl border border-slate-200 bg-white p-4 text-center shadow-xl dark:border-slate-700 dark:bg-slate-800';
 
 export function HomePage() {
   const user = useAuthStore(selectUser);

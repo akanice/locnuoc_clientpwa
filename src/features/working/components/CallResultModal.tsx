@@ -37,25 +37,25 @@ const statusStyles: Record<
   success: {
     icon: HiCheckCircle,
     base: 'border-success/20 bg-success/5 text-success hover:border-success/35 hover:bg-success/10',
-    selected: 'border-success bg-success text-white shadow-sm ring-2 ring-success/25',
+    selected: 'border-success bg-success text-white shadow-xl ring-2 ring-success/25',
     iconSelected: 'text-white',
   },
   called: {
     icon: HiPhone,
     base: 'border-warning/20 bg-warning/5 text-amber-700 hover:border-warning/35 hover:bg-warning/10 dark:text-amber-400',
-    selected: 'border-warning bg-warning text-white shadow-sm ring-2 ring-warning/25',
+    selected: 'border-warning bg-warning text-white shadow-xl ring-2 ring-warning/25',
     iconSelected: 'text-white',
   },
   recall: {
     icon: HiMinusCircle,
     base: 'border-primary/20 bg-primary/5 text-primary hover:border-primary/35 hover:bg-primary/10',
-    selected: 'border-primary bg-primary text-white shadow-sm ring-2 ring-primary/25',
+    selected: 'border-primary bg-primary text-white shadow-xl ring-2 ring-primary/25',
     iconSelected: 'text-white',
   },
   non_exist: {
     icon: HiExclamationCircle,
     base: 'border-danger/20 bg-danger/5 text-danger hover:border-danger/35 hover:bg-danger/10',
-    selected: 'border-danger bg-danger text-white shadow-sm ring-2 ring-danger/25',
+    selected: 'border-danger bg-danger text-white shadow-xl ring-2 ring-danger/25',
     iconSelected: 'text-white',
   },
 };
