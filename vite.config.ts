@@ -14,7 +14,7 @@ export default defineConfig({
     tailwindcss(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['favicon.svg', 'icons/*.png', 'splash/*.png'],
+      includeAssets: ['favicon.png', 'icons/*.png', 'splash/*.png'],
       manifest: {
         name: 'LocNuoc Telesales',
         short_name: 'LocNuoc',
