@@ -1,14 +1,17 @@
 import { useState } from 'react';
 import dayjs from 'dayjs';
-import { HiChevronLeft, HiChevronRight } from 'react-icons/hi';
+import { HiChevronLeft, HiChevronRight, HiClipboardCopy } from 'react-icons/hi';
+import { toast } from 'react-toastify';
 import { Button } from '@/components/ui/Button';
 import { SkeletonList } from '@/components/ui/Skeleton';
+import { OrderDetailModal } from '@/features/statistics/components/OrderDetailModal';
 import { useMyOrders } from '@/features/statistics/hooks/useMyOrders';
 import {
   DEFAULT_ORDERS_PER_PAGE,
   getOrderCustomerName,
   getOrderPhone,
   getOrderStatusLabel,
+  type MyOrder,
 } from '@/features/statistics/services/my-orders.service';
 
 const cardClass =
@@ -25,6 +28,15 @@ function getDefaultToDate() {
   return dayjs().format('YYYY-MM-DD');
 }
 
+async function copyNoteToClipboard(text: string) {
+  try {
+    await navigator.clipboard.writeText(text);
+    toast.success('Đã sao chép ghi chú');
+  } catch {
+    toast.error('Không thể sao chép');
+  }
+}
+
 export function MyOrdersSection() {
   const [fromDateInput, setFromDateInput] = useState(getDefaultFromDate);
   const [toDateInput, setToDateInput] = useState(getDefaultToDate);
@@ -32,6 +44,7 @@ export function MyOrdersSection() {
   const [toDate, setToDate] = useState(getDefaultToDate);
   const [page, setPage] = useState(1);
   const [perPage, setPerPage] = useState(DEFAULT_ORDERS_PER_PAGE);
+  const [selectedOrder, setSelectedOrder] = useState<MyOrder | null>(null);
 
   const { data, isLoading, isFetching, isError } = useMyOrders({
     fromDate,
@@ -140,36 +153,66 @@ export function MyOrdersSection() {
                   <th className="whitespace-nowrap px-3 py-3 font-medium">Trạng thái</th>
                   <th className="whitespace-nowrap px-3 py-3 font-medium">Ghi chú</th>
                   <th className="whitespace-nowrap px-3 py-3 font-medium">Ngày tạo</th>
+                  <th className="whitespace-nowrap px-3 py-3 font-medium">Hành động</th>
                 </tr>
               </thead>
               <tbody>
-                {orders.map((order, index) => (
-                  <tr
-                    key={order.id}
-                    className="border-b border-slate-100 last:border-b-0 dark:border-slate-700/70"
-                  >
-                    <td className="whitespace-nowrap px-3 py-3 text-slate-500 dark:text-slate-400">
-                      {(currentPage - 1) * perPage + index + 1}
-                    </td>
-                    <td className="max-w-[140px] truncate px-3 py-3 font-medium">
-                      {getOrderCustomerName(order)}
-                    </td>
-                    <td className="whitespace-nowrap px-3 py-3 text-slate-600 dark:text-slate-300">
-                      {getOrderPhone(order)}
-                    </td>
-                    <td className="whitespace-nowrap px-3 py-3">
-                      {getOrderStatusLabel(order.status)}
-                    </td>
-                    <td className="max-w-[160px] truncate px-3 py-3 text-slate-500 dark:text-slate-400">
-                      {order.note?.trim() || '—'}
-                    </td>
-                    <td className="whitespace-nowrap px-3 py-3 text-slate-500 dark:text-slate-400">
-                      {order.created_at
-                        ? dayjs(order.created_at).format('DD/MM/YYYY HH:mm')
-                        : '—'}
-                    </td>
-                  </tr>
-                ))}
+                {orders.map((order, index) => {
+                  const noteText = order.note?.trim() || '';
+
+                  return (
+                    <tr
+                      key={order.id}
+                      className="border-b border-slate-100 last:border-b-0 dark:border-slate-700/70"
+                    >
+                      <td className="whitespace-nowrap px-3 py-3 text-slate-500 dark:text-slate-400">
+                        {(currentPage - 1) * perPage + index + 1}
+                      </td>
+                      <td className="max-w-[140px] truncate px-3 py-3 font-medium">
+                        {getOrderCustomerName(order)}
+                      </td>
+                      <td className="whitespace-nowrap px-3 py-3 text-slate-600 dark:text-slate-300">
+                        {getOrderPhone(order)}
+                      </td>
+                      <td className="whitespace-nowrap px-3 py-3">
+                        {getOrderStatusLabel(order.status)}
+                      </td>
+                      <td className="max-w-[180px] px-3 py-3 text-slate-500 dark:text-slate-400">
+                        <div className="flex items-center gap-1.5">
+                          <span className="min-w-0 flex-1 truncate">
+                            {noteText || '—'}
+                          </span>
+                          {noteText && (
+                            <button
+                              type="button"
+                              aria-label="Sao chép ghi chú"
+                              onClick={() => copyNoteToClipboard(noteText)}
+                              className="inline-flex size-7 shrink-0 items-center justify-center rounded-lg text-slate-400 transition-colors hover:bg-slate-100 hover:text-primary active:bg-slate-200 dark:hover:bg-slate-700 dark:hover:text-primary dark:active:bg-slate-600"
+                            >
+                              <HiClipboardCopy size={16} />
+                            </button>
+                          )}
+                        </div>
+                      </td>
+                      <td className="whitespace-nowrap px-3 py-3 text-slate-500 dark:text-slate-400">
+                        {order.created_at
+                          ? dayjs(order.created_at).format('DD/MM/YYYY HH:mm')
+                          : '—'}
+                      </td>
+                      <td className="whitespace-nowrap px-3 py-3">
+                        <Button
+                          type="button"
+                          size="sm"
+                          variant="secondary"
+                          className="min-h-8 min-w-0 px-3 py-1.5 text-xs"
+                          onClick={() => setSelectedOrder(order)}
+                        >
+                          Chi tiết
+                        </Button>
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>
@@ -201,6 +244,12 @@ export function MyOrdersSection() {
           </div>
         </div>
       )}
+
+      <OrderDetailModal
+        open={selectedOrder !== null}
+        order={selectedOrder}
+        onClose={() => setSelectedOrder(null)}
+      />
     </section>
   );
 }

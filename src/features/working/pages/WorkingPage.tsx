@@ -4,7 +4,6 @@ import {
   HiClock,
   HiExclamationCircle,
   HiPhone,
-  HiRefresh,
 } from 'react-icons/hi';
 import { SkeletonList } from '@/components/ui/Skeleton';
 import { Button } from '@/components/ui/Button';
@@ -35,7 +34,6 @@ const statCardClass =
 
 const statusIcons = {
   called: HiPhone,
-  recall: HiRefresh,
   non_exist: HiExclamationCircle,
   available: HiClock,
   just_upload: HiClock,
@@ -43,7 +41,6 @@ const statusIcons = {
 
 const statusIconColors = {
   called: 'text-danger',
-  recall: 'text-primary',
   non_exist: 'text-danger',
   available: 'text-warning',
   just_upload: 'text-warning',

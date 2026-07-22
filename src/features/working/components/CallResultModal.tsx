@@ -187,7 +187,7 @@ export function CallResultModal({
           disabled={!status || !user?.id}
           onClick={handleSave}
         >
-          Lưu và đóng
+          Xác nhận
         </Button>
       </div>
     </Modal>

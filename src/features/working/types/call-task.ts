@@ -15,9 +15,9 @@ export interface CallTask {
 }
 
 const availabilityDisplay: Record<string, { label: string; className: string }> = {
-  available: { label: 'Chờ gọi', className: 'text-warning' },
-  just_upload: { label: 'Chờ gọi', className: 'text-warning' },
-  called: { label: 'Không thành công', className: 'text-danger' },
+  available: { label: 'Chờ gọi', className: 'text-success' },
+  just_upload: { label: 'Chờ gọi', className: 'text-success' },
+  called: { label: 'Không thành công', className: 'text-warning' },
   recall: { label: 'Chờ gọi lại', className: 'text-primary' },
   non_exist: { label: 'Data lỗi', className: 'text-danger' },
 };
@@ -31,7 +31,7 @@ export function getCallTaskStatusDisplay(status: CallTaskStatus) {
 }
 
 export function isCallTaskCallable(status: CallTaskStatus) {
-  return status === 'available' || status === 'just_upload';
+  return status === 'available' || status === 'just_upload' || status === 'recall';
 }
 
 export function isCallTaskProcessed(status: CallTaskStatus) {
