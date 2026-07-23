@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
   HiKey,
@@ -6,10 +7,12 @@ import {
   HiLogout,
   HiChevronRight,
   HiInformationCircle,
+  HiDatabase,
 } from 'react-icons/hi';
 import { useAuthStore, selectUser } from '@/stores/auth.store';
 import { useTheme } from '@/hooks/useTheme';
 import { useConfirmLogout } from '@/features/auth/hooks/useAuth';
+import { ReceiveDataSettingsModal } from '@/features/profile/components/ReceiveDataSettingsModal';
 import { getInitials } from '@/utils';
 import { ROUTES, APP_NAME } from '@/constants';
 
@@ -23,6 +26,7 @@ export function ProfilePage() {
   const user = useAuthStore(selectUser);
   const { resolvedTheme, toggleTheme } = useTheme();
   const { confirmLogout, isPending } = useConfirmLogout();
+  const [receiveDataSettingsOpen, setReceiveDataSettingsOpen] = useState(false);
 
   return (
     <>
@@ -37,6 +41,18 @@ export function ProfilePage() {
             {user.role}
           </div>
         )}
+      </div>
+
+      <div className={`${cardClass} mb-4`}>
+        <button
+          type="button"
+          className={`${menuItemClass} w-full`}
+          onClick={() => setReceiveDataSettingsOpen(true)}
+        >
+          <HiDatabase className="text-xl text-slate-500 dark:text-slate-400" />
+          <span className="flex-1 text-left text-[15px]">Cài đặt data sẽ nhận</span>
+          <HiChevronRight className="text-slate-500 dark:text-slate-400" />
+        </button>
       </div>
 
       <div className={`${cardClass} mb-4`}>
@@ -83,6 +99,11 @@ export function ProfilePage() {
       <p className="mt-6 text-center text-xs text-slate-500 dark:text-slate-400">
         {APP_NAME} © {new Date().getFullYear()}
       </p>
+
+      <ReceiveDataSettingsModal
+        open={receiveDataSettingsOpen}
+        onClose={() => setReceiveDataSettingsOpen(false)}
+      />
     </>
   );
 }
