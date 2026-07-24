@@ -1,11 +1,13 @@
 import { useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import {
+  HiClipboardCopy,
   HiClock,
   HiExclamationCircle,
   HiPhone,
   HiRefresh,
 } from 'react-icons/hi';
+import { toast } from 'react-toastify';
 import { SkeletonList } from '@/components/ui/Skeleton';
 import { Button } from '@/components/ui/Button';
 import { CallResultModal } from '@/features/working/components/CallResultModal';
@@ -45,6 +47,15 @@ const statusIcons: Record<string, typeof HiPhone> = {
 
 function getStatusIcon(status: CallTaskStatus) {
   return statusIcons[status] ?? HiClock;
+}
+
+async function copyAddressToClipboard(text: string) {
+  try {
+    await navigator.clipboard.writeText(text);
+    toast.success('Đã sao chép địa chỉ');
+  } catch {
+    toast.error('Không thể sao chép');
+  }
 }
 
 interface CallModalState {
@@ -202,13 +213,23 @@ export function WorkingPage() {
                       )}
                     </div>
                     {task.address && (
-                      <div
-                        className="mt-1 text-xs text-slate-500 dark:text-slate-400"
-                        title={task.address}
-                      >
-                        {task.address.length > 60
-                          ? `${task.address.slice(0, 60)}...`
-                          : task.address}
+                      <div className="mt-1 flex items-center gap-1">
+                        <div
+                          className="min-w-0 flex-1 text-xs text-slate-500 dark:text-slate-400"
+                          title={task.address}
+                        >
+                          {task.address.length > 60
+                            ? `${task.address.slice(0, 60)}...`
+                            : task.address}
+                        </div>
+                        <button
+                          type="button"
+                          aria-label="Sao chép địa chỉ"
+                          onClick={() => copyAddressToClipboard(task.address!)}
+                          className="inline-flex size-7 shrink-0 items-center justify-center rounded-lg text-slate-400 transition-colors hover:bg-slate-100 hover:text-primary active:bg-slate-200 dark:hover:bg-slate-700 dark:hover:text-primary dark:active:bg-slate-600"
+                        >
+                          <HiClipboardCopy size={16} />
+                        </button>
                       </div>
                     )}
                     {task.note && (
