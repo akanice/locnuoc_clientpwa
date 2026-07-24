@@ -4,6 +4,7 @@ import {
   HiClock,
   HiExclamationCircle,
   HiPhone,
+  HiRefresh,
 } from 'react-icons/hi';
 import { SkeletonList } from '@/components/ui/Skeleton';
 import { Button } from '@/components/ui/Button';
@@ -25,6 +26,7 @@ import {
   getCallTaskStatusDisplay,
   isCallTaskCallable,
   type CallTask,
+  type CallTaskStatus,
 } from '@/features/working/types/call-task';
 
 const cardClass =
@@ -32,19 +34,18 @@ const cardClass =
 const statCardClass =
   'rounded-2xl border border-slate-100 bg-white px-4 py-3 text-center shadow-xl dark:border-slate-700 dark:bg-slate-800';
 
-const statusIcons = {
-  called: HiPhone,
-  non_exist: HiExclamationCircle,
+const statusIcons: Record<string, typeof HiPhone> = {
   available: HiClock,
   just_upload: HiClock,
-} as const;
+  called: HiPhone,
+  recall: HiRefresh,
+  non_exist: HiExclamationCircle,
+  calling: HiPhone,
+};
 
-const statusIconColors = {
-  called: 'text-danger',
-  non_exist: 'text-danger',
-  available: 'text-warning',
-  just_upload: 'text-warning',
-} as const;
+function getStatusIcon(status: CallTaskStatus) {
+  return statusIcons[status] ?? HiClock;
+}
 
 interface CallModalState {
   customerId: number;
@@ -178,32 +179,45 @@ export function WorkingPage() {
       ) : (
         tasks.map((task) => {
           const statusDisplay = getCallTaskStatusDisplay(task.status);
-          const statusKey = task.status as keyof typeof statusIcons;
-          const StatusIcon =
-            !isCallTaskCallable(task.status) && task.status !== 'calling'
-              ? statusIcons[statusKey]
-              : null;
+          const StatusIcon = getStatusIcon(task.status);
 
           return (
             <div key={task.id} className={`${cardClass} mb-3 flex items-center gap-3`}>
-              <div className="flex-1">
-                <div className="text-[15px] font-semibold">
-                  {task.customerName}
-                  {task.phone && (
-                    <span className="text-sm text-slate-500 dark:text-slate-400">
-                      {' '}
-                      - {task.phone}
-                    </span>
-                  )}
-                </div>
-                <div className={`mt-1 text-xs ${statusDisplay.className}`}>
-                  {statusDisplay.label}
-                </div>
-                {task.note && (
-                  <div className="mt-0.5 text-xs text-slate-500 dark:text-slate-400">
-                    {task.note}
+              <div className="min-w-0 flex-1">
+                <div className="flex items-start gap-2">
+                  <StatusIcon
+                    size={18}
+                    className={`mt-0.5 shrink-0 ${statusDisplay.className}`}
+                    aria-label={statusDisplay.label}
+                    title={statusDisplay.label}
+                  />
+                  <div className="min-w-0 flex-1">
+                    <div className="text-[15px] font-semibold">
+                      {task.customerName}
+                      {task.phone && (
+                        <span className="text-sm text-slate-500 dark:text-slate-400">
+                          {' '}
+                          - {task.phone}
+                        </span>
+                      )}
+                    </div>
+                    {task.address && (
+                      <div
+                        className="mt-1 text-xs text-slate-500 dark:text-slate-400"
+                        title={task.address}
+                      >
+                        {task.address.length > 60
+                          ? `${task.address.slice(0, 60)}...`
+                          : task.address}
+                      </div>
+                    )}
+                    {task.note && (
+                      <div className="mt-0.5 text-xs text-slate-500 dark:text-slate-400">
+                        {task.note}
+                      </div>
+                    )}
                   </div>
-                )}
+                </div>
               </div>
               {isCallTaskCallable(task.status) && (
                 <Button
@@ -215,9 +229,6 @@ export function WorkingPage() {
                 >
                   <HiPhone size={20} />
                 </Button>
-              )}
-              {StatusIcon && (
-                <StatusIcon size={24} className={statusIconColors[statusKey] ?? 'text-slate-500'} />
               )}
             </div>
           );

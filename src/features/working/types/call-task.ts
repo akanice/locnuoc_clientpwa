@@ -11,6 +11,7 @@ export interface CallTask {
   customerName: string;
   phone: string;
   status: CallTaskStatus;
+  address?: string;
   note?: string;
 }
 

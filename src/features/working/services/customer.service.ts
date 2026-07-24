@@ -41,6 +41,7 @@ export interface ApiCustomer {
   name?: string | null;
   customer_name?: string | null;
   phone?: string | null;
+  address?: string | null;
   is_available?: string | null;
   note?: string | null;
 }
@@ -100,6 +101,7 @@ function mapToCallTask(customer: ApiCustomer): CallTask {
       customer.customer_name?.trim() ||
       'Khách hàng',
     phone: customer.phone?.trim() || '',
+    address: customer.address?.trim() || undefined,
     status: customer.is_available?.trim() || 'available',
     note: customer.note?.trim() || undefined,
   };
