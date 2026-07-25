@@ -20,7 +20,7 @@ export const ROUTES = {
   WORKING: '/working',
   STATISTICS: '/statistics',
   STATISTICS_BY_PACKAGE: '/statistics/by-package',
-  STATISTICS_AVAILABLE_CUSTOMERS: '/statistics/available-customers',
+  STATISTICS_CUSTOMER_HISTORY: '/statistics/customer-history',
   PROFILE: '/profile',
 } as const;
 

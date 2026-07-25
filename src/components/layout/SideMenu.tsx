@@ -117,11 +117,11 @@ export function SideMenu({ open, onClose }: SideMenuProps) {
                 Thống kê theo gói data
               </NavLink>
               <NavLink
-                to={ROUTES.STATISTICS_AVAILABLE_CUSTOMERS}
+                to={ROUTES.STATISTICS_CUSTOMER_HISTORY}
                 className={subMenuLinkClass}
                 onClick={onClose}
               >
-                Khách hàng khả dụng
+                Lịch sử KH
               </NavLink>
             </div>
           </div>

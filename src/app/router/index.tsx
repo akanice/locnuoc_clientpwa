@@ -31,9 +31,9 @@ const StatsByPackagePage = lazy(() =>
     default: m.StatsByPackagePage,
   })),
 );
-const AvailableCustomersPage = lazy(() =>
-  import('@/features/statistics/pages/AvailableCustomersPage').then((m) => ({
-    default: m.AvailableCustomersPage,
+const CustomerHistoryPage = lazy(() =>
+  import('@/features/statistics/pages/CustomerHistoryPage').then((m) => ({
+    default: m.CustomerHistoryPage,
   })),
 );
 const ProfilePage = lazy(() =>
@@ -121,10 +121,10 @@ export const router = createBrowserRouter([
             ),
           },
           {
-            path: ROUTES.STATISTICS_AVAILABLE_CUSTOMERS,
+            path: ROUTES.STATISTICS_CUSTOMER_HISTORY,
             element: (
               <LazyPage>
-                <AvailableCustomersPage />
+                <CustomerHistoryPage />
               </LazyPage>
             ),
           },

@@ -10,7 +10,7 @@ const pageTitles: Record<string, string> = {
   [ROUTES.WORKING]: 'Làm việc',
   [ROUTES.STATISTICS]: 'Thống kê',
   [ROUTES.STATISTICS_BY_PACKAGE]: 'Thống kê theo gói data',
-  [ROUTES.STATISTICS_AVAILABLE_CUSTOMERS]: 'Khách hàng khả dụng',
+  [ROUTES.STATISTICS_CUSTOMER_HISTORY]: 'Lịch sử KH',
   [ROUTES.PROFILE]: 'Cá nhân',
 };
 
