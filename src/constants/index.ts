@@ -25,7 +25,7 @@ export const ROUTES = {
 } as const;
 
 export const BOTTOM_NAV_ITEMS = [
-  { path: ROUTES.HOME, label: 'Home', icon: 'home' },
-  { path: ROUTES.WORKING, label: 'Working', icon: 'phone' },
-  { path: ROUTES.STATISTICS, label: 'Statistics', icon: 'chart' },
+  { path: ROUTES.HOME, label: 'Trang chủ', icon: 'home' },
+  { path: ROUTES.WORKING, label: 'Gọi điện', icon: 'phone' },
+  { path: ROUTES.STATISTICS, label: 'Thống kê', icon: 'chart' },
 ] as const;

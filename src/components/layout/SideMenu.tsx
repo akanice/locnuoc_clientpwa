@@ -1,9 +1,8 @@
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { NavLink, useLocation } from 'react-router-dom';
 import {
   HiChartBar,
-  HiChevronDown,
   HiHome,
   HiPhone,
   HiUser,
@@ -38,12 +37,9 @@ function isStatisticsPath(pathname: string) {
 
 export function SideMenu({ open, onClose }: SideMenuProps) {
   const { pathname } = useLocation();
-  const [statisticsOpen, setStatisticsOpen] = useState(() => isStatisticsPath(pathname));
 
   useEffect(() => {
     if (!open) return;
-
-    setStatisticsOpen(isStatisticsPath(pathname));
 
     const previousOverflow = document.body.style.overflow;
     document.body.style.overflow = 'hidden';
@@ -51,7 +47,7 @@ export function SideMenu({ open, onClose }: SideMenuProps) {
     return () => {
       document.body.style.overflow = previousOverflow;
     };
-  }, [open, pathname]);
+  }, [open]);
 
   if (!open) return null;
 
@@ -83,68 +79,56 @@ export function SideMenu({ open, onClose }: SideMenuProps) {
         <nav className="flex-1 overflow-y-auto p-3" aria-label="Side menu">
           <NavLink to={ROUTES.HOME} end className={menuLinkClass} onClick={onClose}>
             <HiHome className="text-xl shrink-0" aria-hidden />
-            Home
+            Trang chủ
           </NavLink>
 
           <NavLink to={ROUTES.WORKING} className={menuLinkClass} onClick={onClose}>
             <HiPhone className="text-xl shrink-0" aria-hidden />
-            Working
+            Gọi điện
           </NavLink>
 
           <div className="mt-1">
-            <button
-              type="button"
-              onClick={() => setStatisticsOpen((prev) => !prev)}
-              aria-expanded={statisticsOpen}
+            <div
               className={[
-                'flex min-h-11 w-full items-center gap-3 rounded-xl px-3 text-[15px] font-medium transition-colors',
+                'flex min-h-11 w-full items-center gap-3 rounded-xl px-3 text-[15px] font-medium',
                 isStatisticsPath(pathname)
-                  ? 'bg-primary/10 text-primary'
-                  : 'text-slate-700 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-700',
+                  ? 'text-primary'
+                  : 'text-slate-700 dark:text-slate-200',
               ].join(' ')}
             >
               <HiChartBar className="text-xl shrink-0" aria-hidden />
-              <span className="flex-1 text-left">Statistics</span>
-              <HiChevronDown
-                className={[
-                  'text-lg transition-transform duration-200',
-                  statisticsOpen ? 'rotate-180' : '',
-                ].join(' ')}
-                aria-hidden
-              />
-            </button>
+              <span className="flex-1 text-left">Thống kê</span>
+            </div>
 
-            {statisticsOpen && (
-              <div className="mt-1 space-y-0.5">
-                <NavLink
-                  to={ROUTES.STATISTICS}
-                  end
-                  className={subMenuLinkClass}
-                  onClick={onClose}
-                >
-                  Tổng quan
-                </NavLink>
-                <NavLink
-                  to={ROUTES.STATISTICS_BY_PACKAGE}
-                  className={subMenuLinkClass}
-                  onClick={onClose}
-                >
-                  Thống kê theo gói data
-                </NavLink>
-                <NavLink
-                  to={ROUTES.STATISTICS_AVAILABLE_CUSTOMERS}
-                  className={subMenuLinkClass}
-                  onClick={onClose}
-                >
-                  Khách hàng khả dụng
-                </NavLink>
-              </div>
-            )}
+            <div className="mt-1 space-y-0.5">
+              <NavLink
+                to={ROUTES.STATISTICS}
+                end
+                className={subMenuLinkClass}
+                onClick={onClose}
+              >
+                Tổng quan
+              </NavLink>
+              <NavLink
+                to={ROUTES.STATISTICS_BY_PACKAGE}
+                className={subMenuLinkClass}
+                onClick={onClose}
+              >
+                Thống kê theo gói data
+              </NavLink>
+              <NavLink
+                to={ROUTES.STATISTICS_AVAILABLE_CUSTOMERS}
+                className={subMenuLinkClass}
+                onClick={onClose}
+              >
+                Khách hàng khả dụng
+              </NavLink>
+            </div>
           </div>
 
           <NavLink to={ROUTES.PROFILE} className={menuLinkClass} onClick={onClose}>
             <HiUser className="text-xl shrink-0" aria-hidden />
-            Profile
+            Cá nhân
           </NavLink>
         </nav>
       </aside>

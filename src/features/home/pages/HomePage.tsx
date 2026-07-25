@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import dayjs from 'dayjs';
 import 'dayjs/locale/vi';
-import { HiPhone, HiCheckCircle, HiClock } from 'react-icons/hi';
+import { HiPhone, HiCheckCircle, HiClock, HiTrendingUp } from 'react-icons/hi';
 import { PageSkeleton } from '@/components/ui/Skeleton';
 import { useAuthStore, selectUser } from '@/stores/auth.store';
 import { formatNumber } from '@/utils';
@@ -63,6 +63,7 @@ export function HomePage() {
           <div className="mt-1 text-xs text-slate-500 dark:text-slate-400">Đang chờ</div>
         </div>
         <div className={statCardClass}>
+          <HiTrendingUp className="mx-auto mb-2 text-2xl text-primary" />
           <div className="text-2xl font-bold text-primary">{stats?.conversionRate ?? 0}%</div>
           <div className="mt-1 text-xs text-slate-500 dark:text-slate-400">Tỷ lệ chốt</div>
         </div>
