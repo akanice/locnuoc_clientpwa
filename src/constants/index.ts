@@ -19,6 +19,8 @@ export const ROUTES = {
   HOME: '/',
   WORKING: '/working',
   STATISTICS: '/statistics',
+  STATISTICS_BY_PACKAGE: '/statistics/by-package',
+  STATISTICS_AVAILABLE_CUSTOMERS: '/statistics/available-customers',
   PROFILE: '/profile',
 } as const;
 
@@ -26,5 +28,4 @@ export const BOTTOM_NAV_ITEMS = [
   { path: ROUTES.HOME, label: 'Home', icon: 'home' },
   { path: ROUTES.WORKING, label: 'Working', icon: 'phone' },
   { path: ROUTES.STATISTICS, label: 'Statistics', icon: 'chart' },
-  { path: ROUTES.PROFILE, label: 'Profile', icon: 'user' },
 ] as const;

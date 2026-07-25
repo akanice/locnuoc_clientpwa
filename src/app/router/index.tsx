@@ -26,6 +26,16 @@ const WorkingPage = lazy(() =>
 const StatisticsPage = lazy(() =>
   import('@/features/statistics/pages/StatisticsPage').then((m) => ({ default: m.StatisticsPage })),
 );
+const StatsByPackagePage = lazy(() =>
+  import('@/features/statistics/pages/StatsByPackagePage').then((m) => ({
+    default: m.StatsByPackagePage,
+  })),
+);
+const AvailableCustomersPage = lazy(() =>
+  import('@/features/statistics/pages/AvailableCustomersPage').then((m) => ({
+    default: m.AvailableCustomersPage,
+  })),
+);
 const ProfilePage = lazy(() =>
   import('@/features/profile/pages/ProfilePage').then((m) => ({ default: m.ProfilePage })),
 );
@@ -99,6 +109,22 @@ export const router = createBrowserRouter([
             element: (
               <LazyPage>
                 <StatisticsPage />
+              </LazyPage>
+            ),
+          },
+          {
+            path: ROUTES.STATISTICS_BY_PACKAGE,
+            element: (
+              <LazyPage>
+                <StatsByPackagePage />
+              </LazyPage>
+            ),
+          },
+          {
+            path: ROUTES.STATISTICS_AVAILABLE_CUSTOMERS,
+            element: (
+              <LazyPage>
+                <AvailableCustomersPage />
               </LazyPage>
             ),
           },

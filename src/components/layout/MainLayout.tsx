@@ -3,12 +3,15 @@ import { useQueryClient } from '@tanstack/react-query';
 import { AppShell } from '@/components/layout/AppShell';
 import { BottomNav } from '@/components/layout/BottomNav';
 import { PullToRefresh } from '@/components/common/PullToRefresh';
+import { ROUTES } from '@/constants';
 
 const pageTitles: Record<string, string> = {
-  '/': 'Trang chủ',
-  '/working': 'Làm việc',
-  '/statistics': 'Thống kê',
-  '/profile': 'Cá nhân',
+  [ROUTES.HOME]: 'Trang chủ',
+  [ROUTES.WORKING]: 'Làm việc',
+  [ROUTES.STATISTICS]: 'Thống kê',
+  [ROUTES.STATISTICS_BY_PACKAGE]: 'Thống kê theo gói data',
+  [ROUTES.STATISTICS_AVAILABLE_CUSTOMERS]: 'Khách hàng khả dụng',
+  [ROUTES.PROFILE]: 'Cá nhân',
 };
 
 export function MainLayout() {

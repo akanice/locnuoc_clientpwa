@@ -37,7 +37,7 @@ export function StatisticsPage() {
 
   if (isLoading) return <PageSkeleton />;
 
-  const maxCalls = Math.max(...(stats?.weeklyData.map((d) => d.calls) ?? [1]));
+  // const maxCalls = Math.max(...(stats?.weeklyData.map((d) => d.calls) ?? [1]));
 
   return (
     <>
@@ -75,7 +75,7 @@ export function StatisticsPage() {
         </div> */}
       </div>
 
-      <h3 className="mb-3 text-base font-semibold">Cuộc gọi theo tuần</h3>
+      {/* <h3 className="mb-3 text-base font-semibold">Cuộc gọi theo tuần</h3>
       <div className={cardClass}>
         <div className="flex h-[120px] items-end gap-2">
           {stats?.weeklyData.map((item) => (
@@ -88,7 +88,7 @@ export function StatisticsPage() {
             </div>
           ))}
         </div>
-      </div>
+      </div> */}
 
       <MyOrdersSection />
     </>
