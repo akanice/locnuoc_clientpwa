@@ -2,17 +2,20 @@
 import dayjs from 'dayjs';
 import 'dayjs/locale/vi';
 import { Link } from 'react-router-dom';
+import { toast } from 'react-toastify';
 import {
   HiPhone,
   HiChartBar,
   HiUser,
   HiChevronRight,
-  // HiCheckCircle,
+  HiDownload,
+  HiCheckCircle,
   // HiClock,
   // HiTrendingUp,
 } from 'react-icons/hi';
 // import { PageSkeleton } from '@/components/ui/Skeleton';
 import { useAuthStore, selectUser } from '@/stores/auth.store';
+import { usePwaInstall } from '@/hooks/usePwaInstall';
 import { ROUTES } from '@/constants';
 // import { formatNumber } from '@/utils';
 
@@ -55,6 +58,7 @@ const shortcuts = [
 
 export function HomePage() {
   const user = useAuthStore(selectUser);
+  const { isInstalled, install } = usePwaInstall();
 
   // const { data: stats, isLoading } = useQuery({
   //   queryKey: ['dashboard-stats'],
@@ -68,6 +72,32 @@ export function HomePage() {
   // });
 
   // if (isLoading) return <PageSkeleton />;
+
+  const handleInstallPwa = async () => {
+    const result = await install();
+
+    if (result === 'accepted' || result === 'installed') {
+      toast.success('Ứng dụng đã được cài đặt!');
+      return;
+    }
+
+    if (result === 'ios') {
+      toast.info(
+        'Trên iPhone/iPad: nhấn biểu tượng Chia sẻ rồi chọn "Thêm vào Màn hình chính".',
+        { autoClose: 8000 },
+      );
+      return;
+    }
+
+    if (result === 'dismissed') {
+      return;
+    }
+
+    toast.info(
+      'Mở menu trình duyệt (⋮) và chọn "Cài đặt ứng dụng" hoặc "Add to Home screen".',
+      { autoClose: 8000 },
+    );
+  };
 
   return (
     <>
@@ -149,11 +179,59 @@ export function HomePage() {
       </div>
 
       <h3 className="mb-3 text-base font-semibold">Hoạt động gần đây</h3>
-      <div className={cardClass}>
+      <div className={`${cardClass} mb-5`}>
         <p className="py-4 text-center text-sm text-slate-500 dark:text-slate-400">
           Chưa có hoạt động nào hôm nay. Bắt đầu gọi điện tại tab Working!
         </p>
       </div>
+
+      <button
+        type="button"
+        onClick={handleInstallPwa}
+        disabled={isInstalled}
+        className={[
+          'group relative flex w-full items-center gap-3.5 overflow-hidden rounded-2xl border p-3.5 text-left shadow-xl transition-all duration-200',
+          isInstalled
+            ? 'cursor-default border-emerald-200 bg-emerald-50 dark:border-emerald-800 dark:bg-emerald-950/40'
+            : [
+                'border-slate-200 bg-white',
+                'hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-2xl',
+                'active:translate-y-0 active:scale-[0.98]',
+                'dark:border-slate-700 dark:bg-slate-800',
+              ].join(' '),
+        ].join(' ')}
+      >
+        <div
+          className={[
+            'flex size-12 shrink-0 items-center justify-center rounded-2xl text-white shadow-lg transition-transform duration-200',
+            isInstalled
+              ? 'bg-gradient-to-br from-emerald-500 to-emerald-600 shadow-emerald-500/30'
+              : 'bg-gradient-to-br from-primary to-primary-dark shadow-primary/30 group-hover:scale-105 group-active:scale-95',
+          ].join(' ')}
+        >
+          {isInstalled ? (
+            <HiCheckCircle className="text-2xl" aria-hidden />
+          ) : (
+            <HiDownload className="text-2xl" aria-hidden />
+          )}
+        </div>
+        <div className="min-w-0 flex-1">
+          <div className="text-[15px] font-semibold text-slate-900 dark:text-slate-100">
+            {isInstalled ? 'Đã cài đặt' : 'Cài đặt'}
+          </div>
+          <div className="mt-0.5 truncate text-xs text-slate-500 dark:text-slate-400">
+            {isInstalled
+              ? 'Ứng dụng đang chạy trên thiết bị'
+              : 'Cài ứng dụng ra màn hình chính'}
+          </div>
+        </div>
+        {!isInstalled && (
+          <HiChevronRight
+            className="size-5 shrink-0 text-slate-300 transition-all duration-200 group-hover:translate-x-0.5 group-hover:text-slate-500 dark:text-slate-600 dark:group-hover:text-slate-400"
+            aria-hidden
+          />
+        )}
+      </button>
     </>
   );
 }
