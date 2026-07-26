@@ -3,7 +3,7 @@ import {
   HiCheckCircle,
   HiChevronLeft,
   HiChevronRight,
-  HiPhone,
+  // HiPhone,
   HiTrendingUp,
   HiUserGroup,
 } from 'react-icons/hi';
