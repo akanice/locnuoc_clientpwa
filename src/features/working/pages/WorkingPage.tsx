@@ -61,6 +61,8 @@ async function copyAddressToClipboard(text: string) {
 interface CallModalState {
   customerId: number;
   customerName: string;
+  customerPhone: string;
+  customerAddress: string;
 }
 
 function getCachedTabCount(
@@ -134,7 +136,12 @@ export function WorkingPage() {
     window.location.href = `tel:${task.phone}`;
     setTimeout(() => {
       setActiveCall(null);
-      setCallModal({ customerId: task.id, customerName: task.customerName });
+      setCallModal({
+        customerId: task.id,
+        customerName: task.customerName,
+        customerPhone: task.phone,
+        customerAddress: task.address ?? '',
+      });
     }, 2000);
   };
 
@@ -260,6 +267,8 @@ export function WorkingPage() {
         open={callModal !== null}
         customerId={callModal?.customerId ?? 0}
         customerName={callModal?.customerName ?? ''}
+        customerPhone={callModal?.customerPhone ?? ''}
+        customerAddress={callModal?.customerAddress ?? ''}
         onClose={() => setCallModal(null)}
         onSaved={handleCallSaved}
       />

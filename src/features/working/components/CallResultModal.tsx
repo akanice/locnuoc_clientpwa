@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   HiCheckCircle,
   HiExclamationCircle,
@@ -21,6 +21,8 @@ interface CallResultModalProps {
   open: boolean;
   customerId: number;
   customerName: string;
+  customerPhone?: string;
+  customerAddress?: string;
   onClose: () => void;
   onSaved?: (status: MakeCallStatus) => void;
 }
@@ -67,19 +69,35 @@ export function CallResultModal({
   open,
   customerId,
   customerName,
+  customerPhone = '',
+  customerAddress = '',
   onClose,
   onSaved,
 }: CallResultModalProps) {
   const user = useAuthStore(selectUser);
   const [status, setStatus] = useState<MakeCallStatus | null>(null);
+  const [formCustomerName, setFormCustomerName] = useState('');
+  const [formCustomerPhone, setFormCustomerPhone] = useState('');
+  const [formCustomerAddress, setFormCustomerAddress] = useState('');
   const [note, setNote] = useState('');
   const [appointmentAt, setAppointmentAt] = useState(getDefaultAppointmentValue);
   const makeCall = useMakeCall();
 
   const isSuccessSelected = status === MAKE_CALL_STATUS_SUCCESS;
 
+  useEffect(() => {
+    if (!open) return;
+
+    setFormCustomerName(customerName);
+    setFormCustomerPhone(customerPhone);
+    setFormCustomerAddress(customerAddress);
+  }, [open, customerName, customerPhone, customerAddress]);
+
   const resetForm = () => {
     setStatus(null);
+    setFormCustomerName('');
+    setFormCustomerPhone('');
+    setFormCustomerAddress('');
     setNote('');
     setAppointmentAt(getDefaultAppointmentValue());
   };
@@ -111,6 +129,11 @@ export function CallResultModal({
           selectedStatus === MAKE_CALL_STATUS_SUCCESS
             ? buildMakeCallNote(note, appointmentAt)
             : '',
+        ...(selectedStatus === MAKE_CALL_STATUS_SUCCESS && {
+          customer_name: formCustomerName.trim(),
+          customer_phone: formCustomerPhone.trim(),
+          customer_address: formCustomerAddress.trim(),
+        }),
       },
       {
         onSuccess: () => {
@@ -149,6 +172,48 @@ export function CallResultModal({
 
       {isSuccessSelected && (
         <>
+          <div className="mt-4">
+            <label htmlFor="call-customer-name" className="mb-1.5 block text-sm font-medium">
+              Tên khách hàng
+            </label>
+            <input
+              id="call-customer-name"
+              type="text"
+              value={formCustomerName}
+              onChange={(event) => setFormCustomerName(event.target.value)}
+              placeholder="Nhập tên khách hàng..."
+              className={inputClassName}
+            />
+          </div>
+
+          <div className="mt-4">
+            <label htmlFor="call-customer-phone" className="mb-1.5 block text-sm font-medium">
+              Số điện thoại
+            </label>
+            <input
+              id="call-customer-phone"
+              type="tel"
+              value={formCustomerPhone}
+              onChange={(event) => setFormCustomerPhone(event.target.value)}
+              placeholder="Nhập số điện thoại..."
+              className={inputClassName}
+            />
+          </div>
+
+          <div className="mt-4">
+            <label htmlFor="call-customer-address" className="mb-1.5 block text-sm font-medium">
+              Địa chỉ
+            </label>
+            <textarea
+              id="call-customer-address"
+              rows={2}
+              value={formCustomerAddress}
+              onChange={(event) => setFormCustomerAddress(event.target.value)}
+              placeholder="Nhập địa chỉ..."
+              className={`${inputClassName} resize-none`}
+            />
+          </div>
+
           <div className="mt-4">
             <label htmlFor="call-appointment" className="mb-1.5 block text-sm font-medium">
               Giờ hẹn

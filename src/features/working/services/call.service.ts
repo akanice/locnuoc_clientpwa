@@ -16,6 +16,9 @@ export interface MakeCallPayload {
   user_id: number;
   status: MakeCallStatus;
   note: string;
+  customer_name?: string;
+  customer_phone?: string;
+  customer_address?: string;
 }
 
 export function getDefaultAppointmentValue(): string {
