@@ -1,5 +1,4 @@
 import { useEffect, useMemo, useState, type FormEvent } from 'react';
-import { HiX } from 'react-icons/hi';
 import { Modal } from '@/components/ui/Modal';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
@@ -10,6 +9,8 @@ import {
 } from '@/features/profile/hooks/useUserSettings';
 import {
   PACKAGE_FILTER_OPTIONS,
+  PACKAGE_FILTER_TAG,
+  PACKAGE_FILTER_TITLE,
   getBatchesByPackageName,
   getPackageNameOptions,
   type ImportBatch,
@@ -24,17 +25,48 @@ interface ReceiveDataSettingsModalProps {
 const selectClassName =
   'w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-slate-900 transition-colors duration-150 focus:border-primary focus:outline-none focus:ring-[3px] focus:ring-primary/15 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100';
 
-function getSelectedBatchOptions(
+function restorePackageSelection(
   batches: ImportBatch[],
   importBatchIds: number[],
-): Array<{ id: number; label: string }> {
-  return importBatchIds.map((id) => {
-    const batch = batches.find((item) => item.id === id);
-    return {
-      id,
-      label: batch?.title?.trim() || `Batch #${id}`,
-    };
-  });
+): {
+  filterType: PackageFilterType | '';
+  packageName: string;
+  importBatchIds: number[];
+} {
+  if (importBatchIds.length === 0 || batches.length === 0) {
+    return { filterType: '', packageName: '', importBatchIds: [] };
+  }
+
+  const firstBatch = batches.find((batch) => batch.id === importBatchIds[0]);
+  if (!firstBatch) {
+    return { filterType: '', packageName: '', importBatchIds: importBatchIds.slice(0, 1) };
+  }
+
+  const title = firstBatch.title?.trim();
+  if (title) {
+    const byTitle = getBatchesByPackageName(batches, PACKAGE_FILTER_TITLE, title);
+    if (byTitle.length > 0) {
+      return {
+        filterType: PACKAGE_FILTER_TITLE,
+        packageName: title,
+        importBatchIds: byTitle.map((batch) => batch.id),
+      };
+    }
+  }
+
+  const tag = firstBatch.tags?.find((item) => item?.trim())?.trim();
+  if (tag) {
+    const byTag = getBatchesByPackageName(batches, PACKAGE_FILTER_TAG, tag);
+    if (byTag.length > 0) {
+      return {
+        filterType: PACKAGE_FILTER_TAG,
+        packageName: tag,
+        importBatchIds: byTag.map((batch) => batch.id),
+      };
+    }
+  }
+
+  return { filterType: '', packageName: '', importBatchIds: importBatchIds.slice(0, 1) };
 }
 
 export function ReceiveDataSettingsModal({ open, onClose }: ReceiveDataSettingsModalProps) {
@@ -51,7 +83,6 @@ export function ReceiveDataSettingsModal({ open, onClose }: ReceiveDataSettingsM
 
   const {
     data: settings,
-    isLoading: isSettingsLoading,
     isError: isSettingsError,
   } = useUserSettings({ enabled: open });
 
@@ -62,46 +93,44 @@ export function ReceiveDataSettingsModal({ open, onClose }: ReceiveDataSettingsM
     [batches, filterType],
   );
 
-  const selectedBatchOptions = useMemo(
-    () => getSelectedBatchOptions(batches, importBatchIds),
-    [batches, importBatchIds],
-  );
-
   useEffect(() => {
     if (!open) return;
 
-    setFilterType('');
-    setPackageName('');
-  }, [open]);
-
-  useEffect(() => {
-    if (!open || !settings) return;
+    if (!settings) {
+      setFilterType('');
+      setPackageName('');
+      setMaxAssignQuantity('');
+      setImportBatchIds([]);
+      return;
+    }
 
     setMaxAssignQuantity(
       settings.max_assign_quantity != null ? String(settings.max_assign_quantity) : '',
     );
-    setImportBatchIds(settings.import_batch_ids);
-  }, [open, settings]);
+
+    const restored = restorePackageSelection(batches, settings.import_batch_ids);
+    setFilterType(restored.filterType);
+    setPackageName(restored.packageName);
+    setImportBatchIds(restored.importBatchIds);
+  }, [open, settings, batches]);
 
   const handleFilterTypeChange = (value: PackageFilterType | '') => {
     setFilterType(value);
     setPackageName('');
+    setImportBatchIds([]);
   };
 
   const handlePackageNameChange = (value: string) => {
     setPackageName(value);
 
-    if (!value) return;
+    if (!value) {
+      setImportBatchIds([]);
+      return;
+    }
 
-    const matchedIds = getBatchesByPackageName(batches, filterType, value).map(
-      (batch) => batch.id,
+    setImportBatchIds(
+      getBatchesByPackageName(batches, filterType, value).map((batch) => batch.id),
     );
-
-    setImportBatchIds((prev) => Array.from(new Set([...prev, ...matchedIds])));
-  };
-
-  const handleRemoveSelectedBatch = (batchId: number) => {
-    setImportBatchIds((prev) => prev.filter((id) => id !== batchId));
   };
 
   const handleClose = () => {
@@ -131,8 +160,6 @@ export function ReceiveDataSettingsModal({ open, onClose }: ReceiveDataSettingsM
       },
     );
   };
-
-  const isLoading = isBatchesLoading || isSettingsLoading;
 
   return (
     <Modal open={open} title="Cài đặt data sẽ nhận" onClose={handleClose}>
@@ -184,6 +211,9 @@ export function ReceiveDataSettingsModal({ open, onClose }: ReceiveDataSettingsM
               </option>
             ))}
           </select>
+          <span className="mt-1 block text-[13px] text-slate-500 dark:text-slate-400">
+            Mỗi lần chỉ chọn một gói dữ liệu. Chọn gói mới sẽ thay thế gói hiện tại.
+          </span>
           {isBatchesError && (
             <span className="mt-1 block text-[13px] text-danger">
               Không thể tải danh sách gói dữ liệu
@@ -191,50 +221,16 @@ export function ReceiveDataSettingsModal({ open, onClose }: ReceiveDataSettingsM
           )}
         </div>
 
-        <div className="mb-4">
-          <span className="mb-1.5 block text-sm font-medium">Data đã chọn</span>
-          <div
-            className={[
-              'overflow-hidden rounded-xl border border-slate-200 dark:border-slate-600',
-              isLoading ? 'opacity-60' : '',
-            ]
-              .filter(Boolean)
-              .join(' ')}
-          >
-            {selectedBatchOptions.length === 0 ? (
-              <div className="px-4 py-3 text-sm text-slate-500 dark:text-slate-400">
-                {isLoading ? 'Đang tải...' : 'Chưa chọn data'}
-              </div>
-            ) : (
-              <ul className="max-h-[12rem] overflow-y-auto divide-y divide-slate-200 dark:divide-slate-600">
-                {selectedBatchOptions.map((batch) => (
-                  <li
-                    key={batch.id}
-                    className="flex min-h-11 items-center gap-2 px-3 py-2 text-sm text-slate-900 dark:text-slate-100"
-                  >
-                    <span className="min-w-0 flex-1 truncate">{batch.label}</span>
-                    <button
-                      type="button"
-                      onClick={() => handleRemoveSelectedBatch(batch.id)}
-                      aria-label={`Xóa ${batch.label}`}
-                      className="inline-flex size-8 shrink-0 items-center justify-center rounded-full text-slate-500 transition-colors hover:bg-slate-100 hover:text-danger dark:text-slate-400 dark:hover:bg-slate-700 dark:hover:text-danger"
-                    >
-                      <HiX size={16} />
-                    </button>
-                  </li>
-                ))}
-              </ul>
-            )}
+        {packageName && importBatchIds.length > 0 && (
+          <div className="mb-4 rounded-xl border border-primary/20 bg-primary/5 px-4 py-3 dark:border-primary/25 dark:bg-primary/10">
+            <p className="text-xs font-semibold uppercase tracking-wide text-primary">
+              Gói đang chọn
+            </p>
+            <p className="mt-1 text-sm font-medium text-slate-900 dark:text-slate-100">
+              {packageName}
+            </p>
           </div>
-          <span className="mt-1 block text-[13px] text-slate-500 dark:text-slate-400">
-            Chọn tên gói để thêm data vào danh sách.
-          </span>
-          {isSettingsError && (
-            <span className="mt-1 block text-[13px] text-danger">
-              Không thể tải cài đặt hiện tại
-            </span>
-          )}
-        </div>
+        )}
 
         <Input
           id="receive-max-assign-quantity"
@@ -246,6 +242,11 @@ export function ReceiveDataSettingsModal({ open, onClose }: ReceiveDataSettingsM
           value={maxAssignQuantity}
           onChange={(event) => setMaxAssignQuantity(event.target.value)}
         />
+        {isSettingsError && (
+          <span className="mt-1 block text-[13px] text-danger">
+            Không thể tải cài đặt hiện tại
+          </span>
+        )}
 
         <div className="mt-4 grid grid-cols-2 gap-2">
           <Button type="button" variant="secondary" onClick={handleClose}>

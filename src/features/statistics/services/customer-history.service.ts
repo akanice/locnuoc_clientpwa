@@ -34,7 +34,7 @@ export interface CustomerHistoryItem {
 
 export interface CustomerHistoryParams {
   isAvailable?: string;
-  name?: string;
+  phone?: string;
   page?: number;
   perPage?: number;
 }
@@ -53,8 +53,8 @@ export function buildCustomerHistoryParams(params: CustomerHistoryParams = {}) {
     query['filter[is_available]'] = params.isAvailable;
   }
 
-  if (params.name?.trim()) {
-    query['filter[name]'] = params.name.trim();
+  if (params.phone?.trim()) {
+    query['filter[phone]'] = params.phone.trim();
   }
 
   return query;

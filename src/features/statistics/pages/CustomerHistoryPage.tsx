@@ -35,13 +35,13 @@ function truncateAddress(address: string, max = 60) {
 
 export function CustomerHistoryPage() {
   const [status, setStatus] = useState<CustomerHistoryStatus>(CUSTOMER_HISTORY_STATUS_ALL);
-  const [nameInput, setNameInput] = useState('');
-  const [name, setName] = useState('');
+  const [phoneInput, setPhoneInput] = useState('');
+  const [phone, setPhone] = useState('');
   const [page, setPage] = useState(1);
 
   const { data, isLoading, isFetching, isError } = useCustomerHistory({
     isAvailable: status || undefined,
-    name: name || undefined,
+    phone: phone || undefined,
     page,
     perPage: DEFAULT_CUSTOMER_HISTORY_PER_PAGE,
   });
@@ -58,8 +58,8 @@ export function CustomerHistoryPage() {
     setPage(1);
   };
 
-  const handleApplyNameFilter = () => {
-    setName(nameInput.trim());
+  const handleApplyPhoneFilter = () => {
+    setPhone(phoneInput.trim());
     setPage(1);
   };
 
@@ -93,29 +93,30 @@ export function CustomerHistoryPage() {
         </div>
 
         <div>
-          <label htmlFor="customer-history-name" className="mb-1.5 block text-sm font-medium">
-            Tên khách hàng
+          <label htmlFor="customer-history-phone" className="mb-1.5 block text-sm font-medium">
+            Số điện thoại
           </label>
           <div className="flex items-end gap-3">
             <input
-              id="customer-history-name"
-              type="search"
-              value={nameInput}
-              onChange={(event) => setNameInput(event.target.value)}
+              id="customer-history-phone"
+              type="tel"
+              inputMode="tel"
+              value={phoneInput}
+              onChange={(event) => setPhoneInput(event.target.value)}
               onKeyDown={(event) => {
                 if (event.key === 'Enter') {
                   event.preventDefault();
-                  handleApplyNameFilter();
+                  handleApplyPhoneFilter();
                 }
               }}
-              placeholder="Nhập tên khách hàng..."
+              placeholder="Nhập số điện thoại..."
               className={inputClassName}
             />
             <Button
               type="button"
               size="sm"
               className="w-auto shrink-0 px-5"
-              onClick={handleApplyNameFilter}
+              onClick={handleApplyPhoneFilter}
             >
               Lọc
             </Button>

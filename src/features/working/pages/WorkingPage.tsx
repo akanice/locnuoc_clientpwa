@@ -11,6 +11,11 @@ import { toast } from 'react-toastify';
 import { SkeletonList } from '@/components/ui/Skeleton';
 import { Button } from '@/components/ui/Button';
 import { CallResultModal } from '@/features/working/components/CallResultModal';
+import {
+  WaitingCustomerCard,
+  WaitingCustomerEmpty,
+  WaitingCustomerSkeleton,
+} from '@/features/working/components/WaitingCustomerCard';
 import { useMyCustomers } from '@/features/working/hooks/useMyCustomers';
 import {
   MAKE_CALL_STATUS_SUCCESS,
@@ -129,6 +134,7 @@ export function WorkingPage() {
     (option) => option.value !== CUSTOMER_TAB_WAITING,
   ).reduce((sum, option) => sum + getCachedTabCount(queryClient, option.value), 0);
 
+  const isWaitingTab = activeTab === CUSTOMER_TAB_WAITING;
   const isTabLoading = isLoading || (isFetching && tasks.length === 0);
 
   const handleCall = (task: CallTask) => {
@@ -158,7 +164,9 @@ export function WorkingPage() {
         </div>
       </div>
 
-      <h3 className="mb-3 text-base font-semibold">Danh sách khách hàng</h3>
+      <h3 className="mb-3 text-base font-semibold">
+        {isWaitingTab ? 'Khách hàng tiếp theo' : 'Danh sách khách hàng'}
+      </h3>
 
       <div className="mb-4 flex gap-2 overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
         {CUSTOMER_TAB_OPTIONS.map((option) => {
@@ -188,7 +196,20 @@ export function WorkingPage() {
         </div>
       )}
 
-      {isTabLoading ? (
+      {isWaitingTab ? (
+        isTabLoading ? (
+          <WaitingCustomerSkeleton />
+        ) : tasks.length === 0 ? (
+          <WaitingCustomerEmpty />
+        ) : (
+          <WaitingCustomerCard
+            task={tasks[0]}
+            isCalling={activeCall === tasks[0].id}
+            onCall={handleCall}
+            onCopyAddress={copyAddressToClipboard}
+          />
+        )
+      ) : isTabLoading ? (
         <SkeletonList count={3} />
       ) : tasks.length === 0 ? (
         <div className={`${cardClass} text-center text-sm text-slate-500 dark:text-slate-400`}>

@@ -121,7 +121,7 @@ export function SideMenu({ open, onClose }: SideMenuProps) {
                 className={subMenuLinkClass}
                 onClick={onClose}
               >
-                Lịch sử KH
+                Lịch sử gọi
               </NavLink>
             </div>
           </div>
