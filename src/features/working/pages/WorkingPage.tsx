@@ -139,7 +139,7 @@ export function WorkingPage() {
 
   const handleCall = (task: CallTask) => {
     setActiveCall(task.id);
-    window.location.href = `tel:${task.phone}`;
+    // window.location.href = `tel:${task.phone}`;
     setTimeout(() => {
       setActiveCall(null);
       setCallModal({
@@ -148,7 +148,7 @@ export function WorkingPage() {
         customerPhone: task.phone,
         customerAddress: task.address ?? '',
       });
-    }, 2000);
+    }, 1000);
   };
 
   return (
