@@ -40,8 +40,6 @@ import {
 
 const cardClass =
   'rounded-2xl border border-slate-100 bg-white px-4 py-3 shadow-xl dark:border-slate-700 dark:bg-slate-800';
-const statCardClass =
-  'rounded-2xl border border-slate-100 bg-white px-4 py-3 text-center shadow-xl dark:border-slate-700 dark:bg-slate-800';
 
 const statusIcons: Record<string, typeof HiPhone> = {
   available: HiClock,
@@ -67,18 +65,6 @@ interface ConfirmModalState {
   customerId: number;
   customerName: string;
   status: MakeCallStatus;
-}
-
-function getCachedTabCount(
-  queryClient: ReturnType<typeof useQueryClient>,
-  tab: CustomerTab,
-) {
-  return (
-    queryClient.getQueryData<CallTask[]>([
-      ...MY_CUSTOMERS_QUERY_KEY,
-      buildMyCustomersQueryParams(tab),
-    ])?.length ?? 0
-  );
 }
 
 export function WorkingPage() {
@@ -169,14 +155,6 @@ export function WorkingPage() {
     );
   };
 
-  // const pendingCount =
-  //   activeTab === CUSTOMER_TAB_WAITING
-  //     ? tasks.length
-  //     : getCachedTabCount(queryClient, CUSTOMER_TAB_WAITING);
-  // const calledCount = CUSTOMER_TAB_OPTIONS.filter(
-  //   (option) => option.value !== CUSTOMER_TAB_WAITING,
-  // ).reduce((sum, option) => sum + getCachedTabCount(queryClient, option.value), 0);
-
   const isWaitingTab = activeTab === CUSTOMER_TAB_WAITING;
   const isTabLoading = isLoading || (isFetching && tasks.length === 0);
 
@@ -193,17 +171,6 @@ export function WorkingPage() {
 
   return (
     <>
-      {/* <div className="mb-4 grid grid-cols-2 gap-3">
-        <div className={statCardClass}>
-          <div className="text-2xl font-bold text-primary">{pendingCount}</div>
-          <div className="mt-1 text-xs text-slate-500 dark:text-slate-400">Chờ gọi</div>
-        </div>
-        <div className={statCardClass}>
-          <div className="text-2xl font-bold text-primary">{calledCount}</div>
-          <div className="mt-1 text-xs text-slate-500 dark:text-slate-400">Đã gọi</div>
-        </div>
-      </div> */}
-
       <h3 className="mb-3 text-base font-semibold">
         {isWaitingTab ? 'Khách hàng tiếp theo' : 'Danh sách khách hàng'}
       </h3>
