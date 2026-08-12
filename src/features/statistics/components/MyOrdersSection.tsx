@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import dayjs from 'dayjs';
-import { HiChevronLeft, HiChevronRight, HiClipboardCopy } from 'react-icons/hi';
-import { toast } from 'react-toastify';
+import { HiChevronLeft, HiChevronRight } from 'react-icons/hi';
 import { Button } from '@/components/ui/Button';
+import { CopyToClipboardButton } from '@/components/common/CopyToClipboardButton';
 import { SkeletonList } from '@/components/ui/Skeleton';
 import { OrderDetailModal } from '@/features/statistics/components/OrderDetailModal';
 import { useMyOrders } from '@/features/statistics/hooks/useMyOrders';
@@ -10,7 +10,6 @@ import {
   DEFAULT_ORDERS_PER_PAGE,
   getOrderCustomerName,
   getOrderPhone,
-  getOrderStatusLabel,
   type MyOrder,
 } from '@/features/statistics/services/my-orders.service';
 
@@ -26,15 +25,6 @@ function getDefaultFromDate() {
 
 function getDefaultToDate() {
   return dayjs().format('YYYY-MM-DD');
-}
-
-async function copyNoteToClipboard(text: string) {
-  try {
-    await navigator.clipboard.writeText(text);
-    toast.success('Đã sao chép ghi chú');
-  } catch {
-    toast.error('Không thể sao chép');
-  }
 }
 
 export function MyOrdersSection() {
@@ -149,9 +139,8 @@ export function MyOrdersSection() {
                 <tr>
                   <th className="whitespace-nowrap px-3 py-3 font-medium">#</th>
                   <th className="whitespace-nowrap px-3 py-3 font-medium">Khách hàng</th>
-                  <th className="whitespace-nowrap px-3 py-3 font-medium">SĐT</th>
-                  <th className="whitespace-nowrap px-3 py-3 font-medium">Trạng thái</th>
                   <th className="whitespace-nowrap px-3 py-3 font-medium">Ghi chú</th>
+                  <th className="whitespace-nowrap px-3 py-3 font-medium">SĐT</th>
                   <th className="whitespace-nowrap px-3 py-3 font-medium">Ngày tạo</th>
                   <th className="whitespace-nowrap px-3 py-3 font-medium">Hành động</th>
                 </tr>
@@ -171,28 +160,22 @@ export function MyOrdersSection() {
                       <td className="max-w-[140px] truncate px-3 py-3 font-medium">
                         {getOrderCustomerName(order)}
                       </td>
-                      <td className="whitespace-nowrap px-3 py-3 text-slate-600 dark:text-slate-300">
-                        {getOrderPhone(order)}
-                      </td>
-                      <td className="whitespace-nowrap px-3 py-3">
-                        {getOrderStatusLabel(order.status)}
-                      </td>
                       <td className="max-w-[180px] px-3 py-3 text-slate-500 dark:text-slate-400">
                         <div className="flex items-center gap-1.5">
                           <span className="min-w-0 flex-1 truncate">
                             {noteText || '—'}
                           </span>
                           {noteText && (
-                            <button
-                              type="button"
-                              aria-label="Sao chép ghi chú"
-                              onClick={() => copyNoteToClipboard(noteText)}
-                              className="inline-flex size-7 shrink-0 items-center justify-center rounded-lg text-slate-400 transition-colors hover:bg-slate-100 hover:text-primary active:bg-slate-200 dark:hover:bg-slate-700 dark:hover:text-primary dark:active:bg-slate-600"
-                            >
-                              <HiClipboardCopy size={16} />
-                            </button>
+                            <CopyToClipboardButton
+                              text={noteText}
+                              successMessage="Đã sao chép ghi chú"
+                              ariaLabel="Sao chép ghi chú"
+                            />
                           )}
                         </div>
+                      </td>
+                      <td className="whitespace-nowrap px-3 py-3 text-slate-600 dark:text-slate-300">
+                        {getOrderPhone(order)}
                       </td>
                       <td className="whitespace-nowrap px-3 py-3 text-slate-500 dark:text-slate-400">
                         {order.created_at

@@ -1,25 +1,54 @@
 import {
-  HiClipboardCopy,
+  HiCheckCircle,
   HiClock,
+  HiExclamationCircle,
   HiLocationMarker,
+  HiMinusCircle,
   HiPhone,
   HiUser,
 } from 'react-icons/hi';
-import { Button } from '@/components/ui/Button';
+import { CopyToClipboardButton } from '@/components/common/CopyToClipboardButton';
+import {
+  CALL_RESULT_OPTIONS,
+  type MakeCallStatus,
+} from '@/features/working/services/call.service';
 import { getCallTaskStatusDisplay, type CallTask } from '@/features/working/types/call-task';
 
 interface WaitingCustomerCardProps {
   task: CallTask;
-  isCalling: boolean;
-  onCall: (task: CallTask) => void;
-  onCopyAddress: (text: string) => void;
+  isSubmitting?: boolean;
+  onSelectStatus: (status: MakeCallStatus) => void;
 }
+
+const statusStyles: Record<
+  MakeCallStatus,
+  {
+    icon: typeof HiCheckCircle;
+    base: string;
+  }
+> = {
+  success: {
+    icon: HiCheckCircle,
+    base: 'border-success/20 bg-success/5 text-success hover:border-success/35 hover:bg-success/10',
+  },
+  called: {
+    icon: HiPhone,
+    base: 'border-warning/20 bg-warning/5 text-amber-700 hover:border-warning/35 hover:bg-warning/10 dark:text-amber-400',
+  },
+  recall: {
+    icon: HiMinusCircle,
+    base: 'border-primary/20 bg-primary/5 text-primary hover:border-primary/35 hover:bg-primary/10',
+  },
+  non_exist: {
+    icon: HiExclamationCircle,
+    base: 'border-danger/20 bg-danger/5 text-danger hover:border-danger/35 hover:bg-danger/10',
+  },
+};
 
 export function WaitingCustomerCard({
   task,
-  isCalling,
-  onCall,
-  onCopyAddress,
+  isSubmitting = false,
+  onSelectStatus,
 }: WaitingCustomerCardProps) {
   const statusDisplay = getCallTaskStatusDisplay(task.status);
 
@@ -68,14 +97,13 @@ export function WaitingCustomerCard({
               <p className="min-w-0 flex-1 text-[15px] leading-relaxed text-slate-700 dark:text-slate-200">
                 {task.address}
               </p>
-              <button
-                type="button"
-                aria-label="Sao chép địa chỉ"
-                onClick={() => onCopyAddress(task.address!)}
+              <CopyToClipboardButton
+                text={task.address!}
+                successMessage="Đã sao chép địa chỉ"
+                ariaLabel="Sao chép địa chỉ"
+                iconSize={18}
                 className="inline-flex size-9 shrink-0 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-500 transition-colors hover:border-primary/30 hover:text-primary active:scale-[0.98] dark:border-slate-600 dark:bg-slate-800 dark:hover:border-primary/40"
-              >
-                <HiClipboardCopy size={18} />
-              </button>
+              />
             </div>
           </div>
         )}
@@ -87,16 +115,32 @@ export function WaitingCustomerCard({
         )}
       </div>
 
-      <div className="flex justify-center border-t border-primary/10 px-6 py-6 dark:border-primary/15">
-        <Button
-          variant="primary"
-          loading={isCalling}
-          onClick={() => onCall(task)}
-          className="min-h-[3.75rem] w-auto min-w-[12rem] rounded-2xl px-10 py-4 text-base shadow-lg shadow-primary/25 ring-4 ring-primary/10 transition-transform active:scale-[0.98]"
-        >
-          <HiPhone size={24} aria-hidden />
-          Gọi ngay
-        </Button>
+      <div className="border-t border-primary/10 px-4 py-5 dark:border-primary/15 sm:px-6">
+        <p className="mb-3 text-center text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
+          Kết quả gọi
+        </p>
+        <div className="grid grid-cols-2 gap-2.5">
+          {CALL_RESULT_OPTIONS.map((option) => {
+            const style = statusStyles[option.value];
+            const Icon = style.icon;
+
+            return (
+              <button
+                key={option.value}
+                type="button"
+                disabled={isSubmitting}
+                onClick={() => onSelectStatus(option.value)}
+                className={[
+                  'flex min-h-[4.25rem] flex-col items-center justify-center gap-1.5 rounded-xl border-2 px-2 py-3 text-center text-xs font-semibold transition-all duration-150 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60 sm:min-h-[4.75rem] sm:text-sm',
+                  style.base,
+                ].join(' ')}
+              >
+                <Icon size={22} aria-hidden />
+                {option.label}
+              </button>
+            );
+          })}
+        </div>
       </div>
     </div>
   );
@@ -132,8 +176,14 @@ export function WaitingCustomerSkeleton() {
         </div>
         <div className="skeleton-shimmer h-24 rounded-2xl" />
       </div>
-      <div className="border-t border-slate-100 px-6 py-6 dark:border-slate-700">
-        <div className="skeleton-shimmer mx-auto h-14 max-w-xs rounded-2xl" />
+      <div className="border-t border-slate-100 px-4 py-5 dark:border-slate-700 sm:px-6">
+        <div className="grid grid-cols-2 gap-2.5">
+          <div className="skeleton-shimmer col-span-2 h-4 w-24 justify-self-center rounded-lg" />
+          <div className="skeleton-shimmer h-[4.25rem] rounded-xl sm:h-[4.75rem]" />
+          <div className="skeleton-shimmer h-[4.25rem] rounded-xl sm:h-[4.75rem]" />
+          <div className="skeleton-shimmer h-[4.25rem] rounded-xl sm:h-[4.75rem]" />
+          <div className="skeleton-shimmer h-[4.25rem] rounded-xl sm:h-[4.75rem]" />
+        </div>
       </div>
     </div>
   );

@@ -43,20 +43,30 @@ export function formatAppointmentDisplay(value: string): string {
   });
 }
 
-export function buildMakeCallNote(note: string, appointmentAt: string): string {
-  const trimmedNote = note.trim();
+export interface MakeCallNoteInput {
+  name: string;
+  phone: string;
+  address: string;
+  appointmentAt: string;
+  note: string;
+}
 
-  if (!appointmentAt) {
-    return trimmedNote;
-  }
+export function buildMakeCallNote({
+  name,
+  phone,
+  address,
+  appointmentAt,
+  note,
+}: MakeCallNoteInput): string {
+  const appointmentLabel = appointmentAt ? formatAppointmentDisplay(appointmentAt) : '';
 
-  const appointmentLabel = formatAppointmentDisplay(appointmentAt);
-
-  if (trimmedNote) {
-    return `${trimmedNote} - Giờ hẹn: ${appointmentLabel}`;
-  }
-
-  return `Giờ hẹn: ${appointmentLabel}`;
+  return [
+    name.trim(),
+    phone.trim(),
+    address.trim(),
+    appointmentLabel,
+    `"Ghi chú":${note.trim()}`,
+  ].join(' - ');
 }
 
 export const callService = {

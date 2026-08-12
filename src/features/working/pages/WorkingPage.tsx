@@ -1,26 +1,28 @@
 import { useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import {
-  HiClipboardCopy,
   HiClock,
   HiExclamationCircle,
   HiPhone,
   HiRefresh,
 } from 'react-icons/hi';
-import { toast } from 'react-toastify';
 import { SkeletonList } from '@/components/ui/Skeleton';
 import { Button } from '@/components/ui/Button';
+import { CopyToClipboardButton } from '@/components/common/CopyToClipboardButton';
+import { CallConfirmModal } from '@/features/working/components/CallConfirmModal';
 import { CallResultModal } from '@/features/working/components/CallResultModal';
 import {
   WaitingCustomerCard,
   WaitingCustomerEmpty,
   WaitingCustomerSkeleton,
 } from '@/features/working/components/WaitingCustomerCard';
+import { useMakeCall } from '@/features/working/hooks/useMakeCall';
 import { useMyCustomers } from '@/features/working/hooks/useMyCustomers';
 import {
   MAKE_CALL_STATUS_SUCCESS,
   type MakeCallStatus,
 } from '@/features/working/services/call.service';
+import { useAuthStore, selectUser } from '@/stores/auth.store';
 import {
   buildMyCustomersQueryParams,
   CUSTOMER_TAB_OPTIONS,
@@ -54,20 +56,17 @@ function getStatusIcon(status: CallTaskStatus) {
   return statusIcons[status] ?? HiClock;
 }
 
-async function copyAddressToClipboard(text: string) {
-  try {
-    await navigator.clipboard.writeText(text);
-    toast.success('Đã sao chép địa chỉ');
-  } catch {
-    toast.error('Không thể sao chép');
-  }
-}
-
 interface CallModalState {
   customerId: number;
   customerName: string;
   customerPhone: string;
   customerAddress: string;
+}
+
+interface ConfirmModalState {
+  customerId: number;
+  customerName: string;
+  status: MakeCallStatus;
 }
 
 function getCachedTabCount(
@@ -84,12 +83,16 @@ function getCachedTabCount(
 
 export function WorkingPage() {
   const queryClient = useQueryClient();
+  const user = useAuthStore(selectUser);
+  const makeCall = useMakeCall();
   const [activeTab, setActiveTab] = useState<CustomerTab>(CUSTOMER_TAB_WAITING);
   const [loadedTabs, setLoadedTabs] = useState<Set<CustomerTab>>(
     () => new Set([CUSTOMER_TAB_WAITING]),
   );
   const [activeCall, setActiveCall] = useState<number | null>(null);
   const [callModal, setCallModal] = useState<CallModalState | null>(null);
+  const [confirmModal, setConfirmModal] = useState<ConfirmModalState | null>(null);
+  const [lastSentCallNote, setLastSentCallNote] = useState<string | null>(null);
   const [reloadTabsOnSelect, setReloadTabsOnSelect] = useState(false);
 
   const queryParams: MyCustomersParams = buildMyCustomersQueryParams(activeTab);
@@ -117,8 +120,12 @@ export function WorkingPage() {
     }
   };
 
-  const handleCallSaved = (status: MakeCallStatus) => {
+  const handleCallSaved = (status: MakeCallStatus, note?: string) => {
     if (status !== MAKE_CALL_STATUS_SUCCESS) return;
+
+    if (note) {
+      setLastSentCallNote(note);
+    }
 
     setReloadTabsOnSelect(true);
     queryClient.removeQueries({ queryKey: MY_CUSTOMERS_QUERY_KEY });
@@ -126,34 +133,67 @@ export function WorkingPage() {
     reloadTab(activeTab);
   };
 
-  const pendingCount =
-    activeTab === CUSTOMER_TAB_WAITING
-      ? tasks.length
-      : getCachedTabCount(queryClient, CUSTOMER_TAB_WAITING);
-  const calledCount = CUSTOMER_TAB_OPTIONS.filter(
-    (option) => option.value !== CUSTOMER_TAB_WAITING,
-  ).reduce((sum, option) => sum + getCachedTabCount(queryClient, option.value), 0);
-
-  const isWaitingTab = activeTab === CUSTOMER_TAB_WAITING;
-  const isTabLoading = isLoading || (isFetching && tasks.length === 0);
-
-  const handleCall = (task: CallTask) => {
-    setActiveCall(task.id);
-    // window.location.href = `tel:${task.phone}`;
-    setTimeout(() => {
-      setActiveCall(null);
+  const handleSelectStatus = (task: CallTask, status: MakeCallStatus) => {
+    if (status === MAKE_CALL_STATUS_SUCCESS) {
       setCallModal({
         customerId: task.id,
         customerName: task.customerName,
         customerPhone: task.phone,
         customerAddress: task.address ?? '',
       });
+      return;
+    }
+
+    setConfirmModal({
+      customerId: task.id,
+      customerName: task.customerName,
+      status,
+    });
+  };
+
+  const handleConfirmStatus = () => {
+    if (!confirmModal || !user?.id) return;
+
+    makeCall.mutate(
+      {
+        customer_id: confirmModal.customerId,
+        user_id: user.id,
+        status: confirmModal.status,
+        note: '',
+      },
+      {
+        onSuccess: () => {
+          setConfirmModal(null);
+        },
+      },
+    );
+  };
+
+  // const pendingCount =
+  //   activeTab === CUSTOMER_TAB_WAITING
+  //     ? tasks.length
+  //     : getCachedTabCount(queryClient, CUSTOMER_TAB_WAITING);
+  // const calledCount = CUSTOMER_TAB_OPTIONS.filter(
+  //   (option) => option.value !== CUSTOMER_TAB_WAITING,
+  // ).reduce((sum, option) => sum + getCachedTabCount(queryClient, option.value), 0);
+
+  const isWaitingTab = activeTab === CUSTOMER_TAB_WAITING;
+  const isTabLoading = isLoading || (isFetching && tasks.length === 0);
+
+  const handleCall = (task: CallTask) => {
+    setActiveCall(task.id);
+    window.location.href = `tel:${task.phone}`;
+    setTimeout(() => {
+      setActiveCall(null);
     }, 1000);
   };
 
+  const waitingTask = tasks[0];
+  const isSubmittingCallResult = makeCall.isPending;
+
   return (
     <>
-      <div className="mb-4 grid grid-cols-2 gap-3">
+      {/* <div className="mb-4 grid grid-cols-2 gap-3">
         <div className={statCardClass}>
           <div className="text-2xl font-bold text-primary">{pendingCount}</div>
           <div className="mt-1 text-xs text-slate-500 dark:text-slate-400">Chờ gọi</div>
@@ -162,7 +202,7 @@ export function WorkingPage() {
           <div className="text-2xl font-bold text-primary">{calledCount}</div>
           <div className="mt-1 text-xs text-slate-500 dark:text-slate-400">Đã gọi</div>
         </div>
-      </div>
+      </div> */}
 
       <h3 className="mb-3 text-base font-semibold">
         {isWaitingTab ? 'Khách hàng tiếp theo' : 'Danh sách khách hàng'}
@@ -203,10 +243,9 @@ export function WorkingPage() {
           <WaitingCustomerEmpty />
         ) : (
           <WaitingCustomerCard
-            task={tasks[0]}
-            isCalling={activeCall === tasks[0].id}
-            onCall={handleCall}
-            onCopyAddress={copyAddressToClipboard}
+            task={waitingTask}
+            isSubmitting={isSubmittingCallResult}
+            onSelectStatus={(status) => handleSelectStatus(waitingTask, status)}
           />
         )
       ) : isTabLoading ? (
@@ -250,14 +289,11 @@ export function WorkingPage() {
                             ? `${task.address.slice(0, 60)}...`
                             : task.address}
                         </div>
-                        <button
-                          type="button"
-                          aria-label="Sao chép địa chỉ"
-                          onClick={() => copyAddressToClipboard(task.address!)}
-                          className="inline-flex size-7 shrink-0 items-center justify-center rounded-lg text-slate-400 transition-colors hover:bg-slate-100 hover:text-primary active:bg-slate-200 dark:hover:bg-slate-700 dark:hover:text-primary dark:active:bg-slate-600"
-                        >
-                          <HiClipboardCopy size={16} />
-                        </button>
+                        <CopyToClipboardButton
+                          text={task.address!}
+                          successMessage="Đã sao chép địa chỉ"
+                          ariaLabel="Sao chép địa chỉ"
+                        />
                       </div>
                     )}
                     {task.note && (
@@ -284,6 +320,24 @@ export function WorkingPage() {
         })
       )}
 
+      {lastSentCallNote && (
+        <section className={`${cardClass} mt-4 p-4`}>
+          <div className="mb-2 flex items-start justify-between gap-3">
+            <h4 className="text-sm font-semibold text-slate-900 dark:text-slate-100">
+              Thông tin đơn hàng gần nhất
+            </h4>
+            <CopyToClipboardButton
+              text={lastSentCallNote}
+              successMessage="Đã sao chép thông tin"
+              ariaLabel="Sao chép thông tin đơn gần nhất"
+            />
+          </div>
+          <p className="break-words text-sm leading-relaxed text-slate-600 dark:text-slate-300">
+            {lastSentCallNote}
+          </p>
+        </section>
+      )}
+
       <CallResultModal
         open={callModal !== null}
         customerId={callModal?.customerId ?? 0}
@@ -292,6 +346,15 @@ export function WorkingPage() {
         customerAddress={callModal?.customerAddress ?? ''}
         onClose={() => setCallModal(null)}
         onSaved={handleCallSaved}
+      />
+
+      <CallConfirmModal
+        open={confirmModal !== null}
+        customerName={confirmModal?.customerName ?? ''}
+        status={confirmModal?.status ?? null}
+        loading={makeCall.isPending}
+        onClose={() => setConfirmModal(null)}
+        onConfirm={handleConfirmStatus}
       />
     </>
   );

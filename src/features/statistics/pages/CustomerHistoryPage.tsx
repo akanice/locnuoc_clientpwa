@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import dayjs from 'dayjs';
-import { HiChevronLeft, HiChevronRight, HiClipboardCopy, HiLocationMarker } from 'react-icons/hi';
-import { toast } from 'react-toastify';
+import { HiChevronLeft, HiChevronRight, HiLocationMarker } from 'react-icons/hi';
 import { Button } from '@/components/ui/Button';
+import { CopyToClipboardButton } from '@/components/common/CopyToClipboardButton';
 import { SkeletonList } from '@/components/ui/Skeleton';
 import { useCustomerHistory } from '@/features/statistics/hooks/useCustomerHistory';
 import {
@@ -19,15 +19,6 @@ const cardClass =
 
 const inputClassName =
   'w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-900 transition-colors duration-150 focus:border-primary focus:outline-none focus:ring-[3px] focus:ring-primary/15 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100';
-
-async function copyText(text: string, successMessage: string) {
-  try {
-    await navigator.clipboard.writeText(text);
-    toast.success(successMessage);
-  } catch {
-    toast.error('Không thể sao chép');
-  }
-}
 
 function truncateAddress(address: string, max = 60) {
   return address.length > max ? `${address.slice(0, max)}...` : address;
@@ -174,14 +165,11 @@ export function CustomerHistoryPage() {
                     <span className="min-w-0 flex-1" title={customer.address}>
                       {truncateAddress(customer.address)}
                     </span>
-                    <button
-                      type="button"
-                      aria-label="Sao chép địa chỉ"
-                      onClick={() => copyText(customer.address!, 'Đã sao chép địa chỉ')}
-                      className="inline-flex size-7 shrink-0 items-center justify-center rounded-lg text-slate-400 transition-colors hover:bg-slate-100 hover:text-primary active:bg-slate-200 dark:hover:bg-slate-700 dark:hover:text-primary dark:active:bg-slate-600"
-                    >
-                      <HiClipboardCopy size={16} />
-                    </button>
+                    <CopyToClipboardButton
+                      text={customer.address!}
+                      successMessage="Đã sao chép địa chỉ"
+                      ariaLabel="Sao chép địa chỉ"
+                    />
                   </div>
                 )}
 
