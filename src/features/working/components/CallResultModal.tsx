@@ -37,7 +37,7 @@ export function CallResultModal({
   const [formCustomerPhone, setFormCustomerPhone] = useState('');
   const [formCustomerAddress, setFormCustomerAddress] = useState('');
   const [note, setNote] = useState('');
-  const [appointmentAt, setAppointmentAt] = useState(getDefaultAppointmentValue);
+  const [appointmentAt, setAppointmentAt] = useState(getDefaultAppointmentValue());
   const makeCall = useMakeCall();
 
   useEffect(() => {
