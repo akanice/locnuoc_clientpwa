@@ -68,4 +68,6 @@ export function formatNumber(value: number): string {
   return new Intl.NumberFormat('vi-VN').format(value);
 }
 
+export { formatApiDateTime, API_DATETIME_DISPLAY_FORMAT } from '@/utils/datetime';
+
 export { copyTextToClipboard } from '@/utils/clipboard';

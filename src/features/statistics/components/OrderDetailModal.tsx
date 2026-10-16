@@ -1,5 +1,5 @@
-import dayjs from 'dayjs';
 import { Modal } from '@/components/ui/Modal';
+import { formatApiDateTime } from '@/utils/datetime';
 import type { MyOrder } from '@/features/statistics/services/my-orders.service';
 import {
   getOrderCustomerName,
@@ -39,19 +39,11 @@ export function OrderDetailModal({ open, order, onClose }: OrderDetailModalProps
         <DetailRow label="Ghi chú" value={note || '—'} />
         <DetailRow
           label="Ngày tạo"
-          value={
-            order.created_at
-              ? dayjs(order.created_at).format('DD/MM/YYYY HH:mm')
-              : '—'
-          }
+          value={formatApiDateTime(order.created_at) || '—'}
         />
         <DetailRow
           label="Cập nhật lần cuối"
-          value={
-            order.updated_at
-              ? dayjs(order.updated_at).format('DD/MM/YYYY HH:mm')
-              : '—'
-          }
+          value={formatApiDateTime(order.updated_at) || '—'}
         />
       </dl>
     </Modal>

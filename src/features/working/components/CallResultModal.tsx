@@ -3,6 +3,7 @@ import { Modal } from '@/components/ui/Modal';
 import { Button } from '@/components/ui/Button';
 import {
   buildMakeCallNote,
+  formatAppointmentUtc,
   getDefaultAppointmentValue,
   MAKE_CALL_STATUS_SUCCESS,
   type MakeCallStatus,
@@ -82,6 +83,7 @@ export function CallResultModal({
         customer_name: formCustomerName.trim(),
         customer_phone: formCustomerPhone.trim(),
         customer_address: formCustomerAddress.trim(),
+        time_set: formatAppointmentUtc(appointmentAt),
       },
       {
         onSuccess: () => {

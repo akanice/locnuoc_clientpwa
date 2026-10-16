@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import dayjs from 'dayjs';
 import { HiChevronLeft, HiChevronRight, HiLocationMarker } from 'react-icons/hi';
 import { Button } from '@/components/ui/Button';
 import { CopyToClipboardButton } from '@/components/common/CopyToClipboardButton';
@@ -12,7 +11,7 @@ import {
   getCustomerHistoryStatusDisplay,
   type CustomerHistoryStatus,
 } from '@/features/statistics/services/customer-history.service';
-import { formatNumber } from '@/utils';
+import { formatApiDateTime, formatNumber } from '@/utils';
 
 const cardClass =
   'rounded-2xl border border-slate-200 bg-white shadow-xl dark:border-slate-700 dark:bg-slate-800';
@@ -181,9 +180,7 @@ export function CustomerHistoryPage() {
                   )}
                   <span>
                     Cập nhật:{' '}
-                    {customer.updated_at
-                      ? dayjs(customer.updated_at).format('DD/MM/YYYY HH:mm')
-                      : '—'}
+                    {formatApiDateTime(customer.updated_at) || '—'}
                   </span>
                 </div>
               </article>

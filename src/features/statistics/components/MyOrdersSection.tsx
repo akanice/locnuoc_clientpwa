@@ -12,6 +12,7 @@ import {
   getOrderPhone,
   type MyOrder,
 } from '@/features/statistics/services/my-orders.service';
+import { formatApiDateTime } from '@/utils/datetime';
 
 const cardClass =
   'rounded-2xl border border-slate-200 bg-white p-4 shadow-xl dark:border-slate-700 dark:bg-slate-800';
@@ -178,9 +179,7 @@ export function MyOrdersSection() {
                         {getOrderPhone(order)}
                       </td>
                       <td className="whitespace-nowrap px-3 py-3 text-slate-500 dark:text-slate-400">
-                        {order.created_at
-                          ? dayjs(order.created_at).format('DD/MM/YYYY HH:mm')
-                          : '—'}
+                        {formatApiDateTime(order.created_at) || '—'}
                       </td>
                       <td className="whitespace-nowrap px-3 py-3">
                         <Button

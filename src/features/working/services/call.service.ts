@@ -19,12 +19,39 @@ export interface MakeCallPayload {
   customer_name?: string;
   customer_phone?: string;
   customer_address?: string;
+  time_set?: string;
 }
 
 export function getDefaultAppointmentValue(): string {
   const now = new Date();
   const local = new Date(now.getTime() - now.getTimezoneOffset() * 60_000);
   return local.toISOString().slice(0, 16);
+}
+
+export function formatAppointmentUtc(value: string): string {
+  const match = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})(?::(\d{2}))?/.exec(value);
+
+  if (!match) {
+    return '';
+  }
+
+  const [, year, month, day, hour, minute, second = '0'] = match;
+  const date = new Date(
+    Number(year),
+    Number(month) - 1,
+    Number(day),
+    Number(hour),
+    Number(minute),
+    Number(second),
+  );
+
+  if (Number.isNaN(date.getTime())) {
+    return '';
+  }
+
+  const pad = (part: number) => String(part).padStart(2, '0');
+
+  return `${date.getUTCFullYear()}-${pad(date.getUTCMonth() + 1)}-${pad(date.getUTCDate())} ${pad(date.getUTCHours())}:${pad(date.getUTCMinutes())}:${pad(date.getUTCSeconds())}`;
 }
 
 export function formatAppointmentDisplay(value: string): string {
