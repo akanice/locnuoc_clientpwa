@@ -1,29 +1,19 @@
 import axios, { type AxiosError, type InternalAxiosRequestConfig } from 'axios';
 import { API_BASE_URL, AUTH_ENDPOINTS } from '@/constants';
+import {
+  expireSession,
+  isUnrecoverableRefreshError,
+  refreshAccessToken,
+  refreshIfExpired,
+} from '@/lib/auth/session';
+import { SessionExpiredError, isSessionExpiredError } from '@/lib/auth/session-error';
 import { useAuthStore } from '@/stores/auth.store';
 import { unwrapApiData } from '@/utils';
-import { extractAuthTokens } from '@/utils/auth-response';
-import type { ApiResponse, AuthTokens } from '@/types';
 
-let isRefreshing = false;
-let failedQueue: Array<{
-  resolve: (token: string) => void;
-  reject: (error: unknown) => void;
-}> = [];
+type RetryableRequest = InternalAxiosRequestConfig & { _retry?: boolean };
 
-const processQueue = (error: unknown, token: string | null = null) => {
-  failedQueue.forEach((prom) => {
-    if (error) {
-      prom.reject(error);
-    } else if (token) {
-      prom.resolve(token);
-    }
-  });
-  failedQueue = [];
-};
-
-const isAuthRequest = (url?: string) =>
-  url?.includes(AUTH_ENDPOINTS.LOGIN) || url?.includes(AUTH_ENDPOINTS.REFRESH);
+const isLoginRequest = (url?: string) => url?.includes(AUTH_ENDPOINTS.LOGIN) ?? false;
+const isRefreshRequest = (url?: string) => url?.includes(AUTH_ENDPOINTS.REFRESH) ?? false;
 
 export const apiClient = axios.create({
   baseURL: API_BASE_URL,
@@ -34,11 +24,22 @@ export const apiClient = axios.create({
   timeout: 30000,
 });
 
-apiClient.interceptors.request.use((config: InternalAxiosRequestConfig) => {
+apiClient.interceptors.request.use(async (config: InternalAxiosRequestConfig) => {
+  if (isLoginRequest(config.url) || isRefreshRequest(config.url)) {
+    return config;
+  }
+
+  try {
+    await refreshIfExpired();
+  } catch (error) {
+    return Promise.reject(error);
+  }
+
   const { accessToken } = useAuthStore.getState();
-  if (accessToken && config.headers) {
+  if (accessToken) {
     config.headers.Authorization = `Bearer ${accessToken}`;
   }
+
   return config;
 });
 
@@ -48,64 +49,39 @@ apiClient.interceptors.response.use(
     return response;
   },
   async (error: AxiosError) => {
-    const originalRequest = error.config as InternalAxiosRequestConfig & { _retry?: boolean };
-
-    if (error.response?.status !== 401 || originalRequest._retry) {
+    if (isSessionExpiredError(error)) {
       return Promise.reject(error);
     }
 
-    if (isAuthRequest(originalRequest.url)) {
+    const originalRequest = error.config as RetryableRequest | undefined;
+    if (!originalRequest || isLoginRequest(originalRequest.url)) {
       return Promise.reject(error);
     }
 
-    const { refreshToken, clearAuth, setTokens } = useAuthStore.getState();
+    const unauthorized = error.response?.status === 401;
 
-    if (!refreshToken) {
-      clearAuth();
+    if (!unauthorized) {
       return Promise.reject(error);
     }
 
-    if (isRefreshing) {
-      return new Promise<string>((resolve, reject) => {
-        failedQueue.push({ resolve, reject });
-      }).then((token) => {
-        if (originalRequest.headers) {
-          originalRequest.headers.Authorization = `Bearer ${token}`;
-        }
-        return apiClient(originalRequest);
-      });
+    if (originalRequest._retry || isRefreshRequest(originalRequest.url)) {
+      expireSession();
+      return Promise.reject(new SessionExpiredError());
     }
 
     originalRequest._retry = true;
-    isRefreshing = true;
 
     try {
-      const { data } = await axios.post<ApiResponse<AuthTokens>>(
-        `${API_BASE_URL}${AUTH_ENDPOINTS.REFRESH}`,
-        { refresh_token: refreshToken },
-        {
-          headers: {
-            Accept: 'application/json',
-            'Content-Type': 'application/json',
-          },
-        },
-      );
-
-      const tokens = extractAuthTokens(unwrapApiData(data));
-      setTokens(tokens);
-      processQueue(null, tokens.access_token);
-
-      if (originalRequest.headers) {
-        originalRequest.headers.Authorization = `Bearer ${tokens.access_token}`;
-      }
-
+      const token = await refreshAccessToken();
+      originalRequest.headers.Authorization = `Bearer ${token}`;
       return apiClient(originalRequest);
     } catch (refreshError) {
-      processQueue(refreshError, null);
-      clearAuth();
-      return Promise.reject(refreshError);
-    } finally {
-      isRefreshing = false;
+      if (isUnrecoverableRefreshError(refreshError)) {
+        expireSession();
+        return Promise.reject(new SessionExpiredError());
+      }
+
+      return Promise.reject(error);
     }
   },
 );

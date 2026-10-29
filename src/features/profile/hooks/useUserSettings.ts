@@ -1,7 +1,7 @@
 import { useMutation, useQuery, type UseQueryOptions } from '@tanstack/react-query';
 import { toast } from 'react-toastify';
 import { queryClient } from '@/lib/query/client';
-import { getErrorMessage } from '@/utils';
+import { toastApiError } from '@/utils/api-error';
 import {
   USER_SETTINGS_QUERY_KEY,
   userSettingsService,
@@ -28,7 +28,7 @@ export function useUpdateUserSettings() {
       toast.success('Đã lưu cài đặt data sẽ nhận');
     },
     onError: (error) => {
-      toast.error(getErrorMessage(error, 'Không thể lưu cài đặt'));
+      toastApiError(error, 'Không thể lưu cài đặt');
     },
   });
 }

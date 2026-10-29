@@ -5,7 +5,7 @@ import {
   MY_CUSTOMERS_QUERY_KEY,
 } from '@/features/working/types/call-task';
 import { queryClient } from '@/lib/query/client';
-import { getErrorMessage } from '@/utils';
+import { toastApiError } from '@/utils/api-error';
 import type { CreateOrderPayload } from '@/features/working/services/order.service';
 
 export function useCreateOrder() {
@@ -17,7 +17,7 @@ export function useCreateOrder() {
       toast.success(data.message || 'Đã lưu đơn hàng');
     },
     onError: (error) => {
-      toast.error(getErrorMessage(error, 'Không thể tạo đơn hàng'));
+      toastApiError(error, 'Không thể tạo đơn hàng');
     },
   });
 }

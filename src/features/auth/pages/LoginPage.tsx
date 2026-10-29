@@ -1,7 +1,8 @@
-import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { Link, useSearchParams } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { toast } from 'react-toastify';
 import { HiEye, HiEyeOff } from 'react-icons/hi';
 import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
@@ -11,7 +12,21 @@ import { ROUTES, APP_NAME } from '@/constants';
 
 export function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
+  const [searchParams, setSearchParams] = useSearchParams();
   const login = useLogin();
+
+  useEffect(() => {
+    if (searchParams.get('expired') !== '1') return;
+
+    const next = new URLSearchParams(searchParams);
+    next.delete('expired');
+    setSearchParams(next, { replace: true });
+
+    if (sessionStorage.getItem('locnuoc-expired-notice') === '1') return;
+    sessionStorage.setItem('locnuoc-expired-notice', '1');
+    toast.info('Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.');
+    window.setTimeout(() => sessionStorage.removeItem('locnuoc-expired-notice'), 2000);
+  }, [searchParams, setSearchParams]);
 
   const {
     register,

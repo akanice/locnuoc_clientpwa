@@ -6,7 +6,7 @@ import { authService } from '@/features/auth/services/auth.service';
 import { useAuthStore } from '@/stores/auth.store';
 import { queryClient } from '@/lib/query/client';
 import { ROUTES } from '@/constants';
-import { getErrorMessage } from '@/utils';
+import { toastApiError } from '@/utils/api-error';
 import type { LoginFormData } from '@/features/auth/schemas/auth.schema';
 
 export function useLogin() {
@@ -21,7 +21,7 @@ export function useLogin() {
       navigate(ROUTES.HOME, { replace: true });
     },
     onError: (error) => {
-      toast.error(getErrorMessage(error, 'Đăng nhập thất bại'));
+      toastApiError(error, 'Đăng nhập thất bại');
     },
   });
 }
@@ -48,7 +48,7 @@ export function useForgotPassword() {
       toast.success(data.message || 'Link đặt lại mật khẩu đã được gửi');
     },
     onError: (error) => {
-      toast.error(getErrorMessage(error));
+      toastApiError(error);
     },
   });
 }
@@ -63,7 +63,7 @@ export function useResetPassword() {
       navigate(ROUTES.LOGIN, { replace: true });
     },
     onError: (error) => {
-      toast.error(getErrorMessage(error));
+      toastApiError(error);
     },
   });
 }
@@ -78,7 +78,7 @@ export function useChangePassword() {
       navigate(ROUTES.PROFILE, { replace: true });
     },
     onError: (error) => {
-      toast.error(getErrorMessage(error));
+      toastApiError(error);
     },
   });
 }

@@ -3,7 +3,7 @@ import { toast } from 'react-toastify';
 import { callService } from '@/features/working/services/call.service';
 import { MY_CUSTOMERS_QUERY_KEY } from '@/features/working/types/call-task';
 import { queryClient } from '@/lib/query/client';
-import { getErrorMessage } from '@/utils';
+import { toastApiError } from '@/utils/api-error';
 import type { MakeCallPayload } from '@/features/working/services/call.service';
 
 export function useMakeCall() {
@@ -14,7 +14,7 @@ export function useMakeCall() {
       toast.success(data.message || 'Đã lưu kết quả gọi');
     },
     onError: (error) => {
-      toast.error(getErrorMessage(error, 'Không thể lưu kết quả gọi'));
+      toastApiError(error, 'Không thể lưu kết quả gọi');
     },
   });
 }
